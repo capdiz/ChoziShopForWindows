@@ -1,0 +1,68 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Fragment>
+		<ComponentGroup Id="InstallationComponents" Directory="INSTALLFOLDER">
+			<Component Id="MainExecutable" Guid="*">
+				<File Id="ChoziShop" Source="..\ChoziShopForWindows\bin\Release\net8.0-windows\publish\win-x64\ChoziShopForWindows.exe" Name="ChoziShopForWindows.exe" KeyPath="yes" />
+			</Component>
+
+			<Component Id="MainDll" Guid="06a31a77-433a-47ce-8b08-ad272b31a994">
+				<!-- The main .dll (actual WPF code) -->
+				<File Source="$(var.ChoziShopForWindows.TargetDir)\ChoziShopForWindows.dll" />
+				<File Source="..\ChoziShopForWindows\bin\Release\net8.0-windows\publish\win-x64\ChoziShop.Data.pdb" />
+				<File Source="..\ChoziShopForWindows\bin\Release\net8.0-windows\publish\win-x64\ChoziShopForWindows.pdb" />
+				<File Source="..\ChoziShopForWindows\bin\Release\net8.0-windows\publish\win-x64\D3DCompiler_47_cor3.dll" />
+				<File Source="..\ChoziShopForWindows\bin\Release\net8.0-windows\publish\win-x64\e_sqlite3.dll" />
+				<File Source="..\ChoziShopForWindows\bin\Release\net8.0-windows\publish\win-x64\PenImc_cor3.dll" />
+				<File Source="..\ChoziShopForWindows\bin\Release\net8.0-windows\publish\win-x64\PresentationNative_cor3.dll" />
+				<File Source="..\ChoziShopForWindows\bin\Release\net8.0-windows\publish\win-x64\vcruntime140_cor3.dll" />
+				<File Source="..\ChoziShopForWindows\bin\Release\net8.0-windows\publish\win-x64\wpfgfx_cor3.dll" />
+			</Component>
+			
+			<Component Id="ChoziShopWorkerServiceInstallation" Guid="b08d714b-6d42-4b07-b6af-7eafbd7197e6" Directory="XMPP_MESSENGER">				
+				<File Source="..\..\ChoziShopWorkerService\ChoziShopWorkerService\bin\Release\net8.0\win-x64\publish\ChoziShopWorkerService.exe" Name="ChoziShopWorkerService.exe" KeyPath="yes" />
+			
+				<!--The main .dll file-->				
+				<File Source="..\..\ChoziShopWorkerService\ChoziShopWorkerService\bin\Release\net8.0\win-x64\publish\appsettings.Development.json" />
+				<File Source="..\..\ChoziShopWorkerService\ChoziShopWorkerService\bin\Release\net8.0\win-x64\publish\appsettings.json" />
+				<File Source="..\..\ChoziShopWorkerService\ChoziShopWorkerService\bin\Release\net8.0\win-x64\publish\ChoziShopWorkerService.pdb" />
+				<File Source="..\..\ChoziShopWorkerService\ChoziShopWorkerService\bin\Release\net8.0\win-x64\publish\e_sqlite3.dll" />
+				
+				
+				<!--Install the service-->
+				<ServiceInstall
+					Id="ChoziShopWorkerService"
+					Name="ChoziShopWorkerService"
+					DisplayName="ChoziShop Messaging Service"
+					Description="An XMPP messaging service for the ChoziShop point-of-sale."
+					Start="auto"
+					Type="ownProcess"
+					Vital="no"
+					ErrorControl="normal" />
+
+				<ServiceControl
+					Id="StartChoziShopWorkerService"
+					Name="ChoziShopWorkerService"
+					Start="install"
+					Stop="both"
+					Remove="uninstall"
+					Wait="yes" />
+			</Component>
+		</ComponentGroup>
+
+		<ComponentGroup Id="ShortcutComponents" Directory="ApplicationProgramsFolder">
+			<Component Id="StartMenuShortcut" Guid="*">
+				<Shortcut Id="ChoziShopShortCut"
+						  Name="!(bind.Property.ProductName)"
+						  Target="[INSTALLFOLDER]\ChoziShopForWindows.exe"
+						  WorkingDirectory="INSTALLFOLDER" />
+				<RemoveFolder Id ="RemoveShortCut" On="uninstall" />
+				<RegistryValue Root="HKCU"
+							   Key="Software\!(bind.Property.Manufacturer)\!(bind.Property.ProductName)"
+							   Name="Installed"
+							   Type="integer"
+							   Value="1"
+							   KeyPath="yes" />
+			</Component>
+		</ComponentGroup>	
+	</Fragment>
+</Wix>

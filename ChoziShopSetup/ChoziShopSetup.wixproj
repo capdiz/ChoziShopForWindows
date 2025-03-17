@@ -1,0 +1,6 @@
+﻿<Project Sdk="WixToolset.Sdk/5.0.2">
+  <ItemGroup>
+    <ProjectReference Include="..\..\ChoziShopWorkerService\ChoziShopWorkerService\ChoziShopWorkerService.csproj" />
+    <ProjectReference Include="..\ChoziShopForWindows\ChoziShopForWindows.csproj" />
+  </ItemGroup>
+</Project>
