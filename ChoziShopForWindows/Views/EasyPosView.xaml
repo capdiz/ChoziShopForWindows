@@ -1,0 +1,127 @@
+﻿<UserControl x:Class="ChoziShopForWindows.Views.EasyPosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ChoziShopForWindows.Views"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:vm="clr-namespace:ChoziShopForWindows.ViewModels"
+             mc:Ignorable="d" >
+    <UserControl.DataContext>
+        <vm:EasyPosViewModel />
+    </UserControl.DataContext>
+    <ScrollViewer>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <UniformGrid Grid.Row="0" Rows="2" Columns="2">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <hc:Badge Grid.Row="0" Height="28" HorizontalAlignment="Left" FontSize="13" Value="0"  BadgeMargin="0,-10,-90,0" Style="{DynamicResource BadgeInfo}"/>
+                    <Image Grid.Row="0" Source="/Resources/Images/shopping_basket.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="64" Margin="25,5,0,0" />
+
+                    <TextBlock Grid.Row="1" Text="{DynamicResource NoOfItemsHeader}" FontSize="16" FontWeight="SemiBold" FontFamily="Arial"
+           Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}" TextAlignment="Left" Margin="10,5,0,0" />
+                </Grid>
+                <StackPanel Grid.Row="0" Orientation="Vertical">
+                    <TextBlock Text="{DynamicResource TotalAmountHeader}" TextAlignment="Right" Foreground="{DynamicResource TotalAmountHeaderBrush}" 
+               Margin="0,10,10,0" FontSize="18" FontWeight="DemiBold" FontFamily="Arial" />
+                    <TextBlock Text="20,000 Ugx" TextAlignment="Right" Foreground="{DynamicResource DefaultHeaderBrush}" 
+               Margin="0,0,10,0" FontSize="17" FontWeight="DemiBold" FontFamily="Arial" />
+                </StackPanel>
+            </UniformGrid>
+
+            <TabControl Grid.Row="1" Margin="10" Style="{StaticResource TabControlInLine}">
+                <TabItem Header="{DynamicResource CurrentOrderHeader}" IsSelected="True" Foreground="{DynamicResource BlogDrawingBrush}">
+                    <hc:SimplePanel>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <hc:TransitioningContentControl>
+                                <hc:AutoCompleteTextBox hc:InfoElement.Placeholder="Find product by name or product-code" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" 
+                                                        ItemsSource="{Binding ProductNames}" Margin="10" Foreground="{DynamicResource SearchFontBrush}" 
+                                                    Background="{DynamicResource SearchBoxColorBrush}" />
+                            </hc:TransitioningContentControl>
+
+                            <DataGrid Grid.Row="1" HeadersVisibility="All" RowHeaderWidth="60" AutoGenerateColumns="False" ItemsSource="{Binding DataList}">
+                                <DataGrid.RowHeaderTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsSelected,RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
+                                    </DataTemplate>
+                                </DataGrid.RowHeaderTemplate>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn IsReadOnly="True" Width="80" CanUserResize="False" Binding="{Binding ItemNo}" Header="Item No." Foreground="{DynamicResource SearchFontBrush}"/>
+                                    <DataGridTemplateColumn Width="60" CanUserResize="False">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Image Source="{Binding ImgPath}" Width="32" Height="32" Stretch="Uniform"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Width="1*" Binding="{Binding Name}" Header="Item Name"/>
+                                    <DataGridCheckBoxColumn Width="100" CanUserResize="False" Binding="{Binding IsSelected}" Header="Units"/>
+
+                                    <DataGridTextColumn Width="100" Binding="{Binding Remark}" Header="Unit Cost"/>
+                                    <DataGridTextColumn Width="100" Binding="{Binding Remark}" Header="Amount"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                        </Grid>
+                    </hc:SimplePanel>
+                </TabItem>
+                <TabItem Header="{DynamicResource HeldOrderHeader}">
+                    <hc:SimplePanel />
+                </TabItem>
+                <TabItem Header="{DynamicResource OpenOrderHeader}" >
+                    <hc:SimplePanel />
+                </TabItem>
+                <TabItem Header="{DynamicResource ClosedOrderHeader}">
+                    <hc:SimplePanel />
+                </TabItem>
+            </TabControl>
+
+            <hc:TransitioningContentControl Grid.Row="2">
+                <UniformGrid Rows="2" Columns="3" Margin="10" Background="{DynamicResource EasyCheckoutBrush}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Image Grid.Row="0" Source="/Resources/Images/warning_icon.png" VerticalAlignment="Center" Height="64" Width="64" Margin="0,5,0,0" />
+
+                        <hc:Badge Grid.Row="1" Height="28" HorizontalAlignment="Center" FontSize="13" Value="0"  BadgeMargin="0,-16,-88,0" Style="{DynamicResource BadgeDanger}"/>
+                        <Button Grid.Row="1" Content="{DynamicResource StockStatusHeader}" HorizontalAlignment="Center" Width="180"
+Margin="0,5,0,0" Background="{DynamicResource LightSuccessBrush}" Foreground="{DynamicResource OrderProgressHeaderBrush}"/>
+                    </Grid>
+                    <StackPanel Orientation="Vertical">
+                        <Image Source="/Resources/Images/pay_later_icon.png" VerticalAlignment="Center" Height="64" Width="64" Margin="0,5,0,0" />
+                        <Button Content="{DynamicResource PayLaterHeader}" HorizontalAlignment="Center" Width="160"
+                            Margin="0,5,0,0" Background="{DynamicResource PrimaryBrush}" Foreground="{DynamicResource TextIconBrush}"/>
+
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <Image Source="/Resources/Images/checkout_shoppingcart_icon.png" VerticalAlignment="Center" Height="64" Width="64" Margin="0,5,0,0"/>
+                        <Button Content="{DynamicResource CheckoutHeader}" Command="{Binding ShowLoginDialogCommand}" HorizontalAlignment="Center" Width="160"
+        Margin="0,5,0,0" Background="{DynamicResource SearchFontBrush}" Foreground="{DynamicResource TextIconBrush}"/>
+                    </StackPanel>
+                </UniformGrid>
+            </hc:TransitioningContentControl>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

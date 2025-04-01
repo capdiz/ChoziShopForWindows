@@ -1,0 +1,219 @@
+﻿<hc:GlowWindow x:Class="ChoziShopForWindows.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:local="clr-namespace:ChoziShopForWindows" 
+        xmlns:vm="clr-namespace:ChoziShopForWindows.ViewModels"     
+        xmlns:views="clr-namespace:ChoziShopForWindows.Views"
+        mc:Ignorable="d"                      
+               ResizeMode="CanResizeWithGrip"
+               ShowNonClientArea="True"
+               WindowStartupLocation="CenterScreen"
+               WindowStyle="ThreeDBorderWindow"
+               Background="#01579B"
+               Title="ChoziShop. A Simple and Nimble Point-of-Sale for your business" Height="800" Width="1200"              
+               CloseButtonForeground="Brown" 
+               
+               FontSize="15"               
+               FontFamily="Arial"       
+               FontWeight="DemiBold"
+               FontStretch="Medium"               
+               Icon="/Resources/Images/choziicon.ico">
+    <hc:GlowWindow.DataContext>
+        <vm:MainWindowViewModel />
+    </hc:GlowWindow.DataContext>
+    
+    
+    <!--Main Grid-->
+    <!--Margin in WPF is LEFT, TOP, RIGHT, BOTTOM -->
+    <ScrollViewer x:Name="MainScroller" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid Margin="0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <!--Side Menu Content-->
+            <Grid Grid.Row="1" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <hc:Row>
+                    <Border Background="{DynamicResource BorderBrush}" Height="36" CornerRadius="4"/>
+                </hc:Row>
+                <hc:TransitioningContentControl>
+                    <hc:SideMenu BorderThickness="1" Margin="20,35,0,35" VerticalAlignment="Center">
+                        <hc:SideMenu.Resources>
+                            <Color x:Key="PrimaryColor">#FFD80073</Color>
+                            <Color x:Key="DarkPrimaryColor">#FFD80073</Color>
+                            <LinearGradientBrush x:Key="PrimaryBrush" EndPoint="1,0" StartPoint="0,0">
+                                <GradientStop Color="{DynamicResource PrimaryColor}" Offset="0"/>
+                                <GradientStop Color="{DynamicResource DarkPrimaryColor}" Offset="1"/>
+                            </LinearGradientBrush>
+                        </hc:SideMenu.Resources>
+                        
+                        <hc:SideMenuItem x:Name="NavHome" Header="{DynamicResource HomeHeader}" Margin="0,10,0,0" Command="{Binding ShowCurrentUserControlCommand }" CommandParameter="HomeView"
+                                         Foreground="#004D40" FontFamily="Arial" FontSize="16" FontWeight="DemiBold">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/home_black.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavPoS" Header="{DynamicResource PointOfSale}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="EasyPosView"
+                                         Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/cart_pos.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavShops" Header="{DynamicResource ShopsHeader}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="ShopsView"
+                                         Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/shops_icon.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavAddNewShop" Header="{DynamicResource AddStoreHeader}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="CreateShopView"
+                                         Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/add_new_shop.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavStoreKeeper" Header="{DynamicResource KeepersHeader}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="ShopKeepersView"
+                                         Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/keepers_icon.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavOrders" Header="{DynamicResource OrdersHeader}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="OrdersView"
+                                         Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/orders_icon.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavInventory" Header="{DynamicResource InventoryHeader}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="InventoryView"
+                                         Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/inventory_down.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavPayments" Header="{DynamicResource PaymentsHeader}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="PaymentsView"
+                                         Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/payments_icon.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavScheduledOrders" Header="{DynamicResource ScheduledOrdersHeader}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="ScheduledOrdersView"
+                                         Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/scheduled_order.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavDiscounts" Header="{DynamicResource DiscountsHeader}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="DiscountsView"
+                                         Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/discount_icon.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavPromotions" Header="{DynamicResource PromotionsHeader}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="PromotionsView"
+                                         Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/promotion_icon.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                        <hc:SideMenuItem x:Name="NavSettings" Header="{DynamicResource SettingsHeader}" Command="{Binding ShowCurrentUserControlCommand}" CommandParameter="SettingsView"
+                                         Margin="0,0,0,10" Foreground="#0D47A1" FontFamily="Arial" FontSize="14" FontWeight="Medium">
+                            <hc:SideMenuItem.Icon>
+                                <Image Source="/Resources/Images/settings_icon.png" Width="24" Height="24" />
+                            </hc:SideMenuItem.Icon>
+                        </hc:SideMenuItem>
+                    </hc:SideMenu>
+                </hc:TransitioningContentControl>
+
+
+            </Grid>
+
+            <!--Main Content -->
+            <Grid Margin="20,35,20,0" hc:BorderElement.Circular="True" Grid.Column="1" Grid.Row="1" Background="#ECEFF1">
+                <Grid.RowDefinitions>
+                    <RowDefinition MaxHeight="50" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <hc:HighlightTextBlock Grid.Row="0" x:Name="ShopNameHeader" FontFamily="Arial" FontSize="20" FontWeight="DemiBold" Foreground="#00695C"
+                                       Text="{DynamicResource ShopNameHeader}" TextAlignment="Right" Margin="10" />
+                <hc:HighlightTextBlock Grid.Row="0" x:Name="DateTimeHeader" FontFamily="Arial" FontSize="17" FontWeight="DemiBold" Foreground="#388E3C"
+                       Text="{Binding CurrentTime}" TextAlignment="Left" Margin="10" />
+                <hc:Divider Grid.Row="1" LineStrokeDashArray="1,1" />
+                
+                <!--HomeView-->
+                <ContentControl x:Name="HomeViewControl" Grid.Row="2" Visibility="{Binding IsHomeViewVisible}">
+                    <views:HomeView />
+                </ContentControl>
+
+                <ContentControl x:Name="EasyPosView" Grid.Row="2" Visibility="{Binding IsEasyPosviewVisible}">
+                    <views:EasyPosView />
+                </ContentControl>
+
+                <ContentControl x:Name="ShopsView" Grid.Row="2" Visibility="{Binding IsShopsViewVisible}">
+                    <views:ShopsView/>
+                </ContentControl>
+
+                <ContentControl x:Name="CreateShopView" Grid.Row="2" Visibility="{Binding IsCreateShopViewVisible}">
+                    <views:CreateShopView/>
+                </ContentControl>
+
+                <ContentControl x:Name="ShopKeepersView" Grid.Row="2" Visibility="{Binding IsShopKeepersViewVisible}">
+                    <views:ShopKeepersView/>
+                </ContentControl>
+
+                <ContentControl x:Name="OrdersView" Grid.Row="2" Visibility="{Binding IsOrdersViewVisible}">
+                    <views:OrdersView/>
+                </ContentControl>
+
+                <ContentControl x:Name="InventoryView" Grid.Row="2" Visibility="{Binding IsInventoryViewVisible}">
+                    <views:InventoryView/>
+                </ContentControl>
+
+                <ContentControl x:Name="PaymentsView" Grid.Row="2" Visibility="{Binding IsPaymentsViewVisible}">
+                    <views:PaymentsView/>
+                </ContentControl>
+
+                <ContentControl x:Name="ScheduledOrdersView" Grid.Row="2" Visibility="{Binding IsScheduledOrdersViewVisible}">
+                    <views:ScheduledOrdersView/>
+                </ContentControl>
+
+                <ContentControl x:Name="DiscountsView" Grid.Row="2" Visibility="{Binding IsDiscountsViewVisible}">
+                    <views:DiscountsView/>
+                </ContentControl>
+
+                <ContentControl x:Name="PromotionsView" Grid.Row="2" Visibility="{Binding IsPromotionsViewVisible}">
+                    <views:PromotionsView/>
+                </ContentControl>
+
+                <ContentControl x:Name="SettingsView" Grid.Row="2" Visibility="{Binding IsSettingsViewVisible}">
+                    <views:SettingsView/>
+                </ContentControl>
+
+            </Grid>
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{DynamicResource SupportPhone}" HorizontalAlignment="Center" Margin="10" 
+                       Foreground="#90A4AE" FontSize="14" FontWeight="DemiBold" />
+            <Image Grid.Row="3" Grid.Column="1" Source="/Resources/Images/gt_logo_white.png" HorizontalAlignment="Center" Margin="0,0,0,10" 
+                   Width="222" RenderTransformOrigin="0.5,0.5" >
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform AngleY="0.262"/>
+                        <RotateTransform/>
+                        <TranslateTransform Y="0.995"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+            </Image>
+        </Grid>
+    </ScrollViewer>
+
+</hc:GlowWindow>

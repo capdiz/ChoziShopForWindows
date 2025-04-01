@@ -1,0 +1,141 @@
+﻿<UserControl x:Class="ChoziShopForWindows.Views.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ChoziShopForWindows.Views"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:vm="clr-namespace:ChoziShopForWindows.ViewModels"
+             Background="{DynamicResource RegionBrush}"
+             mc:Ignorable="d">
+    <UserControl.DataContext>
+        <vm:HomeViewModel/>
+    </UserControl.DataContext>
+    <hc:TransitioningContentControl>
+        <ScrollViewer>
+            <StackPanel Margin="10">
+                <UniformGrid Rows="2" Columns="3" Margin="5" >
+                    <GroupBox Header="{DynamicResource SalesHeader}" Margin="10" Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}" FontSize="22" FontWeight="Heavy" FontFamily="Dubai" Style="{StaticResource GroupBoxTab}">
+                        <Border Background="{DynamicResource DefaultBrush}" CornerRadius="4" BorderThickness="1" 
+                            BorderBrush="{DynamicResource SalesGroupBoxBrush}" MinHeight="100">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <hc:Badge Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"  BadgeMargin="0,-5,-15,0" Text="12,000 Ugx" Style="{DynamicResource BadgeInfo}">
+                                    <Button Content="Today's sales" Foreground="#00695C" Margin="0,0,50,0" />
+                                </hc:Badge>
+                                <hc:SideMenu Grid.Row="1"  Margin="5">
+                                    
+                                    <hc:SideMenuItem Header="{DynamicResource TodayHeader}" FontSize="15">
+                                        <hc:SideMenuItem.Icon>
+                                            <Image Source="/Resources/Images/today_icon.png" />
+                                        </hc:SideMenuItem.Icon>
+
+                                    </hc:SideMenuItem>
+                                    <hc:SideMenuItem Header="{DynamicResource WeekHeader}" FontSize="15" >
+                                        <hc:SideMenuItem.Icon>
+                                            <Image Source="/Resources/Images/end_week_icon.png" />
+                                        </hc:SideMenuItem.Icon>
+                                    </hc:SideMenuItem>
+                                    <hc:SideMenuItem Header="{DynamicResource MonthHeader}" FontSize="15">
+                                        <hc:SideMenuItem.Icon>
+                                            <Image Source="/Resources/Images/end_of_month_icon.png" />
+                                        </hc:SideMenuItem.Icon>
+                                    </hc:SideMenuItem>
+                                </hc:SideMenu>
+
+
+                            </Grid>
+                        </Border>
+                    </GroupBox>
+                    <GroupBox Header="{DynamicResource OrdersHeader}" Margin="10" Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}" FontSize="20" FontWeight="Heavy" FontFamily="Dubai" Style="{StaticResource GroupBoxTab}">
+                        <Border Background="{DynamicResource DefaultBrush}" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource SalesGroupBoxBrush}" MinHeight="100">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <hc:Badge Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"  BadgeMargin="0,-5,-15,0" Value="12" Style="{DynamicResource BadgeSuccess}">
+                                    <Button Content="Today's closed orders" Foreground="#00695C" Margin="0,0,5,0" />
+                                </hc:Badge>
+                                <hc:SideMenu Grid.Row="1"  Margin="5">
+                                    
+                                    <hc:SideMenuItem Header="{DynamicResource ClosedOrdersHeader}" FontSize="15">
+                                        <hc:SideMenuItem.Icon>
+                                            <Image Source="/Resources/Images/success_icon.png" />
+                                        </hc:SideMenuItem.Icon>
+
+                                    </hc:SideMenuItem>
+                                    <hc:SideMenuItem Header="{DynamicResource PendingOrdersHeader}" FontSize="15" >
+                                        <hc:SideMenuItem.Icon>
+                                            <Image Source="/Resources/Images/pending_check_icon.png" />
+                                        </hc:SideMenuItem.Icon>
+                                    </hc:SideMenuItem>
+                                    <hc:SideMenuItem Header="{DynamicResource PaymentMethodsHeader}" FontSize="15">
+                                        <hc:SideMenuItem.Icon>
+                                            <Image Source="/Resources/Images/card_payment_icon.png" />
+                                        </hc:SideMenuItem.Icon>
+                                    </hc:SideMenuItem>
+                                </hc:SideMenu>
+
+
+                            </Grid>
+                        </Border>
+                    </GroupBox>
+                    <GroupBox Header="{DynamicResource InventoryHeader}" Margin="10" Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}" FontSize="20" FontWeight="Heavy" FontFamily="Dubai" Style="{StaticResource GroupBoxTab}">
+                        <Border Background="{DynamicResource DefaultBrush}" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource SalesGroupBoxBrush}" MinHeight="100">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <hc:Badge Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"  BadgeMargin="0,-5,-15,0"
+                                      Text="Kakira Sugar 1/2" Style="{DynamicResource BadgePrimary}">
+                                </hc:Badge>
+
+                                <hc:SideMenu Grid.Row="1"  Margin="5">
+                                    
+
+                                    <hc:SideMenuItem Header="{DynamicResource TopProductHeader}" FontSize="15">
+                                        <hc:SideMenuItem.Icon>
+                                            <Image Source="/Resources/Images/arrow_up_left_icon.png" />
+                                        </hc:SideMenuItem.Icon>
+                                    </hc:SideMenuItem>
+
+
+                                    <hc:SideMenuItem Header="{DynamicResource TopCategoryHeader}" FontSize="15" >
+                                        <hc:SideMenuItem.Icon >
+                                            <Image Source="/Resources/Images/arrow_up_right_icon.png" />
+                                        </hc:SideMenuItem.Icon>
+                                    </hc:SideMenuItem>
+                                    <hc:SideMenuItem Header="{DynamicResource InventoryTrackerHeader}" FontSize="15">
+                                        <hc:SideMenuItem.Icon>
+                                            <Image Source="/Resources/Images/inventory_tracker_icon.png" />
+                                        </hc:SideMenuItem.Icon>
+                                    </hc:SideMenuItem>
+                                </hc:SideMenu>
+
+
+                            </Grid>
+                        </Border>
+                    </GroupBox>
+
+                </UniformGrid>
+            </StackPanel>
+        </ScrollViewer>
+    </hc:TransitioningContentControl>
+</UserControl>
