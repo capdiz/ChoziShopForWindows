@@ -56,4 +56,8 @@
     </system:String>
     <system:String x:Key="UserAccountLoginHeader">Please login to proceed.</system:String>
     <system:String x:Key="ForgotPasswordHeader">Forgot your password?</system:String>
+    <system:String x:Key="CheckingForStoreHeader">Checking for store details...</system:String>
+    <system:String x:Key="StoreDetailsHeader">Store details found. Fetching shop details..</system:String>
+    <system:String x:Key="InventoriesHeader">Loading inventory...</system:String>
+    <system:String x:Key="CategoriesHeader">Loading product categories...</system:String>
 </ResourceDictionary>

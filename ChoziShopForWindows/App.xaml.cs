@@ -1,6 +1,7 @@
 ﻿using ChoziShop.Data;
 using ChoziShop.Data.Repository;
 using ChoziShopForWindows.Data;
+using ChoziShopForWindows.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Security.AccessControl;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace ChoziShopForWindows;
@@ -30,28 +32,43 @@ public partial class App : Application
             {
                 services.AddDatabaseContext(DbFileConfig.ConnectionString);
                 services.AddScoped<IDataObjects, DataObjects>();
+                services.AddTransient<MainWindowViewModel>();
                 services.AddSingleton<DatabaseWatcher>(provider => new DatabaseWatcher(DbFileConfig.ConnectionString, () =>
                 provider.GetService<ILogger<DatabaseWatcher>>().LogInformation("Database file changed")));
-                services.AddSingleton<MainWindow>();
+                services.AddSingleton<MainWindow>(provider =>
+                {
+                    var window = new MainWindow();
+                    window.DataContext = provider.GetService<MainWindowViewModel>();
+                    return window;
+                });
+                           
+
             })
             .Build();
+
+        
+        
     }
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
-       
+        base.OnStartup(e);
+
         // CheckAndStartService();
-        var directoryInfo = new DirectoryInfo(DbFileConfig.DbFilePath);
-        if (directoryInfo.Exists)
+        var directoryPath = new DirectoryInfo(DbFileConfig.DbFilePath);
+        if (!directoryPath.Exists)
         {
-            var security = directoryInfo.GetAccessControl();
+            Directory.CreateDirectory(directoryPath.FullName);
+        }
+        
+            var security = directoryPath.GetAccessControl();
             security.AddAccessRule(new FileSystemAccessRule("Users",
                 FileSystemRights.FullControl,
                 InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
                 PropagationFlags.None,
                 AccessControlType.Allow));
-            directoryInfo.SetAccessControl(security);
-        }
+            directoryPath.SetAccessControl(security);
+      
 
         using (var scope = _host.Services.CreateScope())
         {
@@ -69,7 +86,12 @@ public partial class App : Application
                 Debug.WriteLine("Error message: {message}", ex.Message);
             }
         }
-        base.OnStartup(e);
+
+        await _host.StartAsync();
+
+        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+        mainWindow.Show();
+
     }
 
     protected override async void OnExit(ExitEventArgs e)

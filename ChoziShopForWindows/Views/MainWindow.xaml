@@ -21,11 +21,11 @@
                FontWeight="DemiBold"
                FontStretch="Medium"               
                Icon="/Resources/Images/choziicon.ico">
-    <hc:GlowWindow.DataContext>
+    <!--<hc:GlowWindow.DataContext>
         <vm:MainWindowViewModel />
-    </hc:GlowWindow.DataContext>
-    
-    
+    </hc:GlowWindow.DataContext>-->
+
+
     <!--Main Grid-->
     <!--Margin in WPF is LEFT, TOP, RIGHT, BOTTOM -->
     <ScrollViewer x:Name="MainScroller" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -58,7 +58,7 @@
                                 <GradientStop Color="{DynamicResource DarkPrimaryColor}" Offset="1"/>
                             </LinearGradientBrush>
                         </hc:SideMenu.Resources>
-                        
+
                         <hc:SideMenuItem x:Name="NavHome" Header="{DynamicResource HomeHeader}" Margin="0,10,0,0" Command="{Binding ShowCurrentUserControlCommand }" CommandParameter="HomeView"
                                          Foreground="#004D40" FontFamily="Arial" FontSize="16" FontWeight="DemiBold">
                             <hc:SideMenuItem.Icon>
@@ -149,7 +149,7 @@
                 <hc:HighlightTextBlock Grid.Row="0" x:Name="DateTimeHeader" FontFamily="Arial" FontSize="17" FontWeight="DemiBold" Foreground="#388E3C"
                        Text="{Binding CurrentTime}" TextAlignment="Left" Margin="10" />
                 <hc:Divider Grid.Row="1" LineStrokeDashArray="1,1" />
-                
+
                 <!--HomeView-->
                 <ContentControl x:Name="HomeViewControl" Grid.Row="2" Visibility="{Binding IsHomeViewVisible}">
                     <views:HomeView />
@@ -202,17 +202,32 @@
             </Grid>
             <TextBlock Grid.Row="2" Grid.Column="1" Text="{DynamicResource SupportPhone}" HorizontalAlignment="Center" Margin="10" 
                        Foreground="#90A4AE" FontSize="14" FontWeight="DemiBold" />
-            <Image Grid.Row="3" Grid.Column="1" Source="/Resources/Images/gt_logo_white.png" HorizontalAlignment="Center" Margin="0,0,0,10" 
-                   Width="222" RenderTransformOrigin="0.5,0.5" >
-                <Image.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform AngleY="0.262"/>
-                        <RotateTransform/>
-                        <TranslateTransform Y="0.995"/>
-                    </TransformGroup>
-                </Image.RenderTransform>
-            </Image>
+            <Grid Grid.Row="3" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Image Grid.Row="0" Grid.Column="0" Source="/Resources/Images/gt_logo_white.png" HorizontalAlignment="Center" Margin="0,0,0,10" 
+       Width="222" RenderTransformOrigin="0.5,0.5" >
+                    <Image.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform AngleY="0.262"/>
+                            <RotateTransform/>
+                            <TranslateTransform Y="0.995"/>
+                        </TransformGroup>
+                    </Image.RenderTransform>
+                </Image>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,1,15,0" Visibility="{Binding IsProgressBarVisible}">
+                    <TextBlock Text="{Binding StoreSetupStatusText, Mode=TwoWay}" Foreground="{DynamicResource ProgressBarBrush}" FontSize="15" FontWeight="ExtraLight" Margin="0,25,0,10"/>
+                    <hc:WaveProgressBar Value="{Binding StoreSetupStatus, Mode=TwoWay}" Text="50%" Background="AliceBlue" Width="50" Height="50"
+                                        Style="{StaticResource ProgressBarInfoWave}"/>
+                </StackPanel>
+            </Grid>
         </Grid>
     </ScrollViewer>
 

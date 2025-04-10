@@ -3,8 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"             
              xmlns:local="clr-namespace:ChoziShopForWindows"
              xmlns:vm="clr-namespace:ChoziShopForWindows.ViewModels"
-             xmlns:views="clr-namespace:ChoziShopForWindows.Views"
-             StartupUri="Views/MainWindow.xaml">
+             xmlns:views="clr-namespace:ChoziShopForWindows.Views">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

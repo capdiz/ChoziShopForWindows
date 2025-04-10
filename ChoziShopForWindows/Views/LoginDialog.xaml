@@ -10,10 +10,8 @@
         CornerRadius="10"
         
         Background="{DynamicResource RegionBrush}">
-    <Border.DataContext>
-        <vm:MainWindowViewModel/>
-    </Border.DataContext>
     
+   
     <hc:SimplePanel>
         <hc:TransitioningContentControl>
             <Grid x:Name="UserLoginGrid">

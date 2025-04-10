@@ -60,6 +60,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.3" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.2" />
@@ -69,7 +70,7 @@
 
   <ItemGroup>
     <Reference Include="ChoziShop.Data">
-      <HintPath>..\..\ChoziShop.Data\ChoziShop.Data\bin\Debug\net8.0\ChoziShop.Data.dll</HintPath>
+      <HintPath>..\..\ChoziShop.Data\ChoziShop.Data\obj\Debug\net8.0\ChoziShop.Data.dll</HintPath>
     </Reference>
   </ItemGroup>
 

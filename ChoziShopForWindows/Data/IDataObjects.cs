@@ -12,7 +12,13 @@ namespace ChoziShopForWindows.Data
     {
         IRepository<UnSyncedObject> UnSyncedObjects { get; }
         IRepository<Merchant> Merchants { get; }
+        IRepository<Store> Stores { get; }
         Task SaveAsync();
         void Rollback();
+
+        Task SaveMerchantAsync(Merchant merchant);  
+        Task<Merchant> SaveAndReturnMerchantAsync(Merchant merchant);
+        
+        Task<Store> SaveAndReturnStoreAsync(Store store);
     }
 }

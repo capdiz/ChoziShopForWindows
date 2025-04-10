@@ -8,6 +8,7 @@
     <Color x:Key="EasyPosOrderColor">#FAFAFA</Color>
     <Color x:Key="SearchBoxColor">#EEEEEE</Color>
     <Color x:Key="SearchFontColor">#263238</Color>
+    <Color x:Key="ProgressBarTextColor">#E0E0E0</Color>
     <SolidColorBrush x:Key="DefaultGroupBoxHeaderBrush" Color="{DynamicResource DefaultHeaderColor}"/>
     <SolidColorBrush x:Key="SalesGroupBoxBrush" Color="{DynamicResource SalesGroupBoxColor}" />
     <SolidColorBrush x:Key="TotalAmountHeaderBrush" Color="{DynamicResource AmountHeader}" />
@@ -16,4 +17,5 @@
     <SolidColorBrush x:Key="EasyCheckoutBrush" Color="{DynamicResource EasyPosOrderColor}" />
     <SolidColorBrush x:Key="SearchBoxColorBrush" Color="{DynamicResource SearchBoxColor}" />
     <SolidColorBrush x:Key="SearchFontBrush" Color="{DynamicResource SearchFontColor}" />
+    <SolidColorBrush x:Key="ProgressBarBrush" Color="{DynamicResource ProgressBarTextColor}" />
 </ResourceDictionary>

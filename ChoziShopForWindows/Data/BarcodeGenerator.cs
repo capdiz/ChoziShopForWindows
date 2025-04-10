@@ -21,6 +21,7 @@ using System.Diagnostics;
 using Image = System.Windows.Controls.Image;
 using System.Windows;
 using System.Windows.Media;
+using Newtonsoft.Json;
 
 namespace ChoziShopForWindows.Data
 {
@@ -31,14 +32,17 @@ namespace ChoziShopForWindows.Data
         private string _deviceToken;
         private readonly Timer _pollingTimer;
 
-        public BarcodeGenerator() { 
+        public EventHandler<MerchantResponse> MerchantResponseHandler;
+
+        public BarcodeGenerator()
+        {
             _pollingTimer = new Timer(2000);
             _pollingTimer.Elapsed += PollForAuthentication;
         }
 
         public BitmapSource GenerateBarcodeImage()
         {
-            _deviceToken= new WindowsAccountTokenGenerator().generateWindowsAccountToken();
+            _deviceToken = new WindowsAccountTokenGenerator().generateWindowsAccountToken();
 
             // string value for our qr code
             var qrcodePayload = $"{_deviceToken}";
@@ -51,16 +55,16 @@ namespace ChoziShopForWindows.Data
                 {
                     Height = 220,
                     Width = 220,
-                   Margin =1
+                    Margin = 1
                 }
             };
 
-            var bitmap = writer.Write(qrcodePayload);        
-            
+            var bitmap = writer.Write(qrcodePayload);
+
             // let us load our logo image
-            var logo = LoadBitmapFromFile();            
+            var logo = LoadBitmapFromFile();
             _pollingTimer.Start();
-            if(logo==null) return BitmapToImageSource(bitmap);
+            if (logo == null) return BitmapToImageSource(bitmap);
 
             // calculate logo size (20% of the total qrcode image size)
             var logoWidth = (int)(bitmap.Width * 0.2);
@@ -68,17 +72,17 @@ namespace ChoziShopForWindows.Data
 
             // create drawing visual
             var drawingVisual = new DrawingVisual();
-            using(var drawingContext = drawingVisual.RenderOpen())
+            using (var drawingContext = drawingVisual.RenderOpen())
             {
                 // draw qr code
                 drawingContext.DrawImage(BitmapToImageSource(bitmap), new Rect(0, 0, bitmap.Width, bitmap.Height));
-               // Draw centered logo
-               var logoRect =new Rect((bitmap.Width - logoWidth) / 2, (bitmap.Height - logoHeight) / 2, logoWidth, logoHeight);
+                // Draw centered logo
+                var logoRect = new Rect((bitmap.Width - logoWidth) / 2, (bitmap.Height - logoHeight) / 2, logoWidth, logoHeight);
                 drawingContext.DrawImage(logo, logoRect);
             }
 
             // render visual to bitmap
-            var finalBitmap =new RenderTargetBitmap(bitmap.Width, bitmap.Height, 96, 96, PixelFormats.Pbgra32);
+            var finalBitmap = new RenderTargetBitmap(bitmap.Width, bitmap.Height, 96, 96, PixelFormats.Pbgra32);
             finalBitmap.Render(drawingVisual);
             return finalBitmap;
         }
@@ -99,20 +103,21 @@ namespace ChoziShopForWindows.Data
                 return bitmapImage;
             }
         }
-        
+
 
         private BitmapSource LoadBitmapFromFile()
         {
             try
             {
-               string path = "pack://application:,,,/Resources/Images/chozi_icon_black.png";
+                string path = "pack://application:,,,/Resources/Images/chozi_icon_black.png";
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
                 bitmap.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.EndInit();
                 return bitmap;
-            }catch
+            }
+            catch
             {
                 return null;
             }
@@ -120,7 +125,8 @@ namespace ChoziShopForWindows.Data
 
         private async void PollForAuthentication(object sender, ElapsedEventArgs e)
         {
-           var isAuthenticated = await CheckAuthentication(_deviceToken);
+            var isAuthenticated = await CheckAuthentication(_deviceToken);
+            Debug.WriteLine("Polling for authentication: Auth status: " + isAuthenticated);
             Application.Current.Dispatcher.Invoke(() =>
             {
                 if (isAuthenticated)
@@ -135,8 +141,17 @@ namespace ChoziShopForWindows.Data
         private async Task<bool> CheckAuthentication(string deviceToken)
         {
             var client = new HttpClient();
-            var response = await client.GetAsync($"{BASE_URL}/windows_accounts?deviceToken={deviceToken}");
-            Debug.WriteLine( response.Content.ReadAsStringAsync().Result, " Status: "+response.StatusCode );
+            var response = await client.GetAsync($"{BASE_URL}/windows_accounts/0/?windows_device_token={deviceToken}");
+            Debug.WriteLine(response.Content.ReadAsStringAsync().Result, " Status: " + response.StatusCode);
+            if (response.StatusCode == System.Net.HttpStatusCode.Found)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var merchant = JsonConvert.DeserializeObject<MerchantResponse>(json);
+                if (merchant != null)
+                    MerchantResponseHandler?.Invoke(this, merchant);
+
+                return true;
+            }
             return response.IsSuccessStatusCode;
         }
 

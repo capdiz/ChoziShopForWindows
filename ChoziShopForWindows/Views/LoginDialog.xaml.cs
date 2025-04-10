@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HandyControl.Interactivity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,11 @@ namespace ChoziShopForWindows.Views
         public LoginDialog()
         {
             InitializeComponent();
+        }
+
+        public void close()
+        {
+            ControlCommands.Close.Execute(true, this);
         }
     }
 }
