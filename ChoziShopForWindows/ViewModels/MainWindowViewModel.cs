@@ -25,6 +25,8 @@ using System.Windows.Media.Imaging;
 using ChoziShop.Data.Repository;
 using HandyControl.Interactivity;
 using ChoziShopForWindows.MerchantsApi;
+using ChoziShopForWindows.models;
+using ChoziShopForWindows.Services;
 
 namespace ChoziShopForWindows.ViewModels
 {
@@ -34,13 +36,24 @@ namespace ChoziShopForWindows.ViewModels
         private DispatcherTimer _dispatchTimer;
         private DatabaseManager choziShopDatabaseManager;
 
+        private SessionManager _sessionManager;
+
         private BitmapSource _qrCodeImage;
 
         private bool isMerchantAccountActivated = false;
+        // Know if current session is a merchant session
+        private bool isMerchantSessionActive = false;
+        // know if app is having an active user session
+        private bool isUserSessionActive = false;
+
+
+        private bool _isStoreHavingKeeperAccounts = false;
 
         private string _selectedViewName = "HomeView";
+        private List<string> _countryOfOperations;
 
-        private LoginDialog LoginDialog;
+        private CreateMerchantAccountDialog CreateMerchantAccountDialog;
+        private UserLoginDialog UserLoginDialog;
 
 
         private Visibility _isHomeViewVisible = Visibility.Visible;
@@ -58,9 +71,12 @@ namespace ChoziShopForWindows.ViewModels
         public Visibility _isProgressBarVisible = Visibility.Collapsed;
 
         private Merchant savedMerchant;
+        private MerchantAccount currentMerchant;
 
         private int _storeSetupStatus = 0;
         private string storeSetupStatusText;
+        private string currentSessionStatus = "Inactive Session";
+        private string currentUserRole = "Unknown User";
 
 
         private object _currentUserControl;
@@ -94,15 +110,27 @@ namespace ChoziShopForWindows.ViewModels
             IsSettingsViewVisible = Visibility.Collapsed;
             IsProgressBarVisible = Visibility.Collapsed;
 
+            CountryOfOperations = new List<string>
+            {
+                "+256",
+                "+254",
+                "+255",
+                "+250",
+                "Burundi",
+                "South Sudan"
+            };
 
             ShowCurrentUserControlCommand = new Commands.RelayCommand(param => ShowSelectedView(param));
             GenerateCodeCommand = new Commands.RelayCommand(_ => GenerateCode());
             choziShopDatabaseManager = new DatabaseManager(DbFileConfig.FullDbOPath, "Merchants");
+            CurrentMerchantAccount = choziShopDatabaseManager.GetMerchant();
             IsMerchantAccountActivated = false;
             barcodeGenerator = new BarcodeGenerator();
             barcodeGenerator.MerchantResponseHandler += OnMerchantReceived;
-
+            isMerchantSessionActive = choziShopDatabaseManager.IsMerchantSessionActive();
+            IsUserSessionActive = false;
         }
+
 
         public bool IsMerchantAccountActivated
         {
@@ -110,6 +138,36 @@ namespace ChoziShopForWindows.ViewModels
             set
             {
                 isMerchantAccountActivated = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsMerchantSessionActive
+        {
+            get { return isMerchantSessionActive; }
+            set
+            {
+                isMerchantSessionActive = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsStoreHavingKeeperAccounts
+        {
+            get { return _isStoreHavingKeeperAccounts; }
+            set
+            {
+                _isStoreHavingKeeperAccounts = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsUserSessionActive
+        {
+            get { return isUserSessionActive; }
+            set
+            {
+                isUserSessionActive = value;
                 OnPropertyChanged();
             }
         }
@@ -134,6 +192,37 @@ namespace ChoziShopForWindows.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public List<string> CountryOfOperations
+        {
+            get { return _countryOfOperations; }
+            set
+            {
+                _countryOfOperations = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string CurrentSessionStatus
+        {
+            get { return currentSessionStatus; }
+            set
+            {
+                currentSessionStatus = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string CurrentUserRole
+        {
+            get { return currentUserRole; }
+            set
+            {
+                currentUserRole = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         public Visibility IsHomeViewVisible
         {
@@ -314,6 +403,16 @@ namespace ChoziShopForWindows.ViewModels
             }
         }
 
+        public MerchantAccount CurrentMerchantAccount
+        {
+            get { return currentMerchant; }
+            set
+            {
+                currentMerchant = value;
+                OnPropertyChanged();
+            }
+        }
+
         public BitmapSource QrCodeImage
         {
             get { return _qrCodeImage; }
@@ -376,6 +475,96 @@ namespace ChoziShopForWindows.ViewModels
             QrCodeImage = barcodeGenerator.GenerateBarcodeImage();
         }
 
+        private void GenerateMerchantLoginQrCode()
+        {
+            if (CurrentMerchantAccount != null)
+            {
+                var baseApi = new BaseApi(CurrentMerchantAccount.AuthToken);
+                barcodeGenerator = new BarcodeGenerator(baseApi);
+                if (isMerchantSessionActive)
+                {
+                    barcodeGenerator.SetIsMerchantSessionActive(isMerchantSessionActive);
+                    barcodeGenerator.SetSessionAuthToken(choziShopDatabaseManager.GetSessionAuthToken());
+                    barcodeGenerator.SetActiveSessionId(choziShopDatabaseManager.GetSessionId());
+                }
+                barcodeGenerator.WindowsSessionResponseHandler += OnSessionActive;
+                QrCodeImage = barcodeGenerator.GenerateLoginBarcode();
+            }
+        }
+
+        private async void OnSessionActive(object sender, WindowsSessionResponse sessionResponse)
+        {
+            Debug.WriteLine("Successfully received session response");
+            if (sessionResponse != null)
+            {
+                if (sessionResponse.Status.Equals("pending"))
+                {
+                    Debug.WriteLine("Session is pending activation. Please wait...");
+                    ActivateMerchantSession(sessionResponse);
+                }
+                else if (sessionResponse.Status.Equals("active"))
+                {
+                    if (choziShopDatabaseManager != null)
+                    {
+                        // Session was just restarted
+                        if (choziShopDatabaseManager.GetSessionAuthToken() == sessionResponse.AuthToken)
+                        {
+                            await _dataObjects.MerchantSessions.UpdateSingleColumnAsync(
+                                predicate: session => session.SessionId == sessionResponse.Id,
+                                updateAction: entity => entity.ExpiresAt = sessionResponse.ExpiresAt);
+                            await Application.Current.Dispatcher.InvokeAsync(() =>
+                            {
+                                // start monitoring session from here                                
+                               _sessionManager = new SessionManager(sessionExpiresAt: sessionResponse.ExpiresAt.ToString());
+                                _sessionManager.SessionExpired += OnSessionExpired;
+                                _sessionManager.StartSessionMonitoring();
+
+                                barcodeGenerator.SetIsMerchantSessionActive(true);
+                                IsMerchantSessionActive = true;
+                                IsUserSessionActive = true;
+                                CurrentSessionStatus = "Active Session";
+                                CurrentUserRole = "Merchant";
+                                Debug.WriteLine("Merchant session successfully reactivated");
+                                UserLoginDialog.close();
+                            });
+                        }
+                        else
+                        {
+                            MerchantSession merchantSession = new MerchantSession
+                            {
+                                SessionId = sessionResponse.Id,
+                                AuthToken = sessionResponse.AuthToken,
+                                DeviceToken = sessionResponse.DeviceToken,
+                                Status = sessionResponse.Status,
+                                ExpiresAt = sessionResponse.ExpiresAt
+                            };
+
+                            MerchantSession savedSession = await _dataObjects.MerchantSessions.SaveAndReturnEntityAsync(merchantSession);
+                            await Application.Current.Dispatcher.InvokeAsync(() =>
+                            {
+                                if (savedSession != null)
+                                {
+                                    // start monitoring session from here                                    
+                                    _sessionManager = new SessionManager(sessionExpiresAt: sessionResponse.ExpiresAt.ToString());
+                                    _sessionManager.SessionExpired += OnSessionExpired;
+                                    _sessionManager.StartSessionMonitoring();
+
+                                    barcodeGenerator.SetIsMerchantSessionActive(true);
+                                    IsMerchantSessionActive = true;
+                                    IsUserSessionActive = true;
+                                    CurrentSessionStatus = "Active Session";
+                                    CurrentUserRole = "Merchant";
+                                    Debug.WriteLine("Session is activated. Please wait...");
+                                    UserLoginDialog.close();
+                                }
+                            });
+                        }
+                    }
+                }
+
+            }
+        }
+
         private async void OnMerchantReceived(object sender, MerchantResponse merchantResponse)
         {
             Debug.WriteLine("Successfully received merchant response");
@@ -406,9 +595,10 @@ namespace ChoziShopForWindows.ViewModels
                         IsProgressBarVisible = Visibility.Visible;
                         StoreSetupStatus = 30;
                         StoreSetupStatusText = "Fetching stores...";
-                        if (LoginDialog != null)
+                        if (CreateMerchantAccountDialog != null)
                         {
-                            LoginDialog.close();
+                            isUserSessionActive = true;
+                            CreateMerchantAccountDialog.close();
                             List<StoreResponse> serializedStores = await FetchMerchantStore();
                             if (serializedStores.Count > 0)
                             {
@@ -442,6 +632,8 @@ namespace ChoziShopForWindows.ViewModels
                                     }
                                     _merchantStores.Add(store);
                                     MerchantStores = _merchantStores;
+
+
                                     if (serializedStore.Id == serializedStores[serializedStores.Count - 1].Id)
                                     {
                                         StoreSetupStatus = 100;
@@ -452,6 +644,58 @@ namespace ChoziShopForWindows.ViewModels
                                     {
                                         StoreSetupStatus = 50 + (i * 10);
                                         StoreSetupStatusText = "Preparing store " + (i + 1) + " of " + serializedStores.Count;
+                                    }
+
+                                    StoreSetupStatus = 70 + (i * 10);
+                                    StoreSetupStatusText = "Fetching categories for store " + (i + 1) + " of " + serializedStores.Count;
+                                    List<CategorySectionResponse> serializedCategories = await FetchStoreCategories(serializedStore.Id);
+                                    if (serializedCategories != null)
+                                    {
+                                        for (int j = 0; j < serializedCategories.Count; j++)
+                                        {
+                                            var categorySection = new CategorySection
+                                            {
+                                                OnlineCategorySectionId = serializedCategories[j].Id,
+                                                InventoryId = serializedCategories[j].InventoryId,
+                                                CategorySectionName = serializedCategories[j].CategoryName,
+                                                CreatedAt = serializedCategories[j].CreatedAt,
+                                                UpdatedAt = serializedCategories[j].UpdatedAt,
+                                            };
+                                            CategorySection savedCategorySection = await _dataObjects.AddCategorySectionAsync(categorySection);
+                                            if (serializedCategories[j].CategoryProducts != null && serializedCategories[j].CategoryProducts.Count > 0)
+                                            {
+                                                for (int k = 0; k < serializedCategories[j].CategoryProducts.Count; k++)
+                                                {
+                                                    var categoryProduct = new CategoryProduct
+                                                    {
+                                                        CategorySection = savedCategorySection,
+                                                        OnlineCategoryProductId = serializedCategories[j].CategoryProducts[k].Id,
+                                                        ProductName = serializedCategories[j].CategoryProducts[k].ProductName,
+                                                        Remarks = serializedCategories[j].CategoryProducts[k].Remarks,
+                                                        Tag = serializedCategories[j].CategoryProducts[k].Tag,
+                                                        Measurement = serializedCategories[j].CategoryProducts[k].Measurement,
+                                                        Currency = "UGX",
+                                                        UnitCost = serializedCategories[j].CategoryProducts[k].UnitCostCents,
+                                                        Units = (int)serializedCategories[j].CategoryProducts[k].Units,
+                                                        ValueMetric = serializedCategories[j].CategoryProducts[k].ValueMetric,
+                                                        CreatedAt = serializedCategories[j].CategoryProducts[k].CreatedAt,
+                                                        UpdatedAt = serializedCategories[j].CategoryProducts[k].UpdatedAt,
+                                                        BarcodeUrl = serializedCategories[j].CategoryProducts[k].BarcodeUrl,
+                                                    };
+                                                    Debug.WriteLine("Adding product " + categoryProduct.ProductName + ". With id: " + categoryProduct.OnlineCategoryProductId +
+                                                        " to category " + savedCategorySection.CategorySectionName);
+                                                    Debug.WriteLine("Category Id: " + savedCategorySection.Id);
+                                                    StoreSetupStatus = 80 + (i * 10);
+                                                    StoreSetupStatusText = "Adding product " + (k + 1) + " of " + serializedCategories[j].CategoryProducts.Count +
+                                                        " to category " + serializedCategories[j].CategoryName;
+                                                    await _dataObjects.AddCategoryProductAsync(categoryProduct);
+                                                }
+
+                                            }
+                                            Debug.WriteLine("Category name: " + serializedCategories[j].CategoryName +
+                                                " No. of products in category: " + serializedCategories[j].CategoryProducts.Count);
+                                        }
+                                        Debug.WriteLine("Serialized categories count: " + serializedCategories.Count);
                                     }
                                 }
                                 Debug.WriteLine(serializedStores.Count + " stores found");
@@ -508,10 +752,18 @@ namespace ChoziShopForWindows.ViewModels
             }
         }
 
-        private void ShowLoginDialog()
+        private void ShowCreateMerchantAccountDialog()
         {
-            LoginDialog = new LoginDialog();
-            HandyControl.Controls.Dialog.Show(LoginDialog);
+            CreateMerchantAccountDialog = new CreateMerchantAccountDialog();
+            HandyControl.Controls.Dialog.Show(CreateMerchantAccountDialog);
+        }
+
+        private void ShowUserLoginDialog()
+        {
+            
+            GenerateMerchantLoginQrCode();
+            UserLoginDialog = new UserLoginDialog();
+            HandyControl.Controls.Dialog.Show(UserLoginDialog);
         }
 
 
@@ -533,11 +785,16 @@ namespace ChoziShopForWindows.ViewModels
                 IsDiscountsViewVisible = Visibility.Collapsed;
                 IsPromotionsViewVisible = Visibility.Collapsed;
                 IsSettingsViewVisible = Visibility.Collapsed;
+                if (!isUserSessionActive)
+                {
+                    ShowUserLoginDialog();
+                }
             }
             else
             {
                 IsMerchantAccountActivated = false;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
+
             }
         }
 
@@ -559,11 +816,12 @@ namespace ChoziShopForWindows.ViewModels
                 IsDiscountsViewVisible = Visibility.Collapsed;
                 IsPromotionsViewVisible = Visibility.Collapsed;
                 IsSettingsViewVisible = Visibility.Collapsed;
+
             }
             else
             {
                 IsMerchantAccountActivated = false;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
             }
 
         }
@@ -589,7 +847,7 @@ namespace ChoziShopForWindows.ViewModels
             else
             {
                 IsMerchantAccountActivated = false;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
             }
         }
 
@@ -614,7 +872,7 @@ namespace ChoziShopForWindows.ViewModels
             else
             {
                 IsMerchantAccountActivated = false;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
             }
         }
 
@@ -635,11 +893,17 @@ namespace ChoziShopForWindows.ViewModels
                 IsDiscountsViewVisible = Visibility.Collapsed;
                 IsPromotionsViewVisible = Visibility.Collapsed;
                 IsSettingsViewVisible = Visibility.Collapsed;
+
+                if (!isUserSessionActive)
+                {
+                    ShowUserLoginDialog();
+                }
+                StoreHasKeeperAccounts();
             }
             else
             {
                 IsMerchantAccountActivated = false;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
             }
         }
 
@@ -664,7 +928,7 @@ namespace ChoziShopForWindows.ViewModels
             else
             {
                 IsMerchantAccountActivated = true;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
                 BarcodeGenerator barcodeGenerator = new BarcodeGenerator();
                 QrCodeImage = barcodeGenerator.GenerateBarcodeImage();
             }
@@ -691,7 +955,7 @@ namespace ChoziShopForWindows.ViewModels
             else
             {
                 IsMerchantAccountActivated = false;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
             }
         }
 
@@ -717,7 +981,7 @@ namespace ChoziShopForWindows.ViewModels
             else
             {
                 IsMerchantAccountActivated = true;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
             }
         }
 
@@ -742,7 +1006,7 @@ namespace ChoziShopForWindows.ViewModels
             else
             {
                 IsMerchantAccountActivated = false;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
             }
 
         }
@@ -768,7 +1032,7 @@ namespace ChoziShopForWindows.ViewModels
             else
             {
                 IsMerchantAccountActivated = false;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
             }
         }
 
@@ -793,7 +1057,7 @@ namespace ChoziShopForWindows.ViewModels
             else
             {
                 IsMerchantAccountActivated = false;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
             }
         }
 
@@ -818,7 +1082,7 @@ namespace ChoziShopForWindows.ViewModels
             else
             {
                 IsMerchantAccountActivated = false;
-                ShowLoginDialog();
+                ShowCreateMerchantAccountDialog();
             }
         }
 
@@ -855,6 +1119,39 @@ namespace ChoziShopForWindows.ViewModels
             return false;
         }
 
+        private bool StoreHasKeeperAccounts()
+        {
+            if (choziShopDatabaseManager.CheckDatabaseExists())
+            {
+                if (choziShopDatabaseManager.CheckTableExists() && choziShopDatabaseManager.StoreHasKeeperAccounts())
+                {
+                    _isStoreHavingKeeperAccounts = false;
+                    return true;
+                }
+                else
+                {
+                    IsStoreHavingKeeperAccounts = true;
+                }
+            }
+
+            return false;
+        }
+
+        private void OnSessionExpired()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                IsMerchantSessionActive = false;
+                IsUserSessionActive = false;
+                CurrentSessionStatus = "Inactive Session";
+                CurrentUserRole = "Unknown User";
+                _sessionManager.StopSessionMonitoring();
+                barcodeGenerator.SetIsMerchantSessionActive(false);
+                Debug.WriteLine("Merchant session expired");
+                ShowUserLoginDialog();
+            });
+        }
+
 
 
         async Task<List<StoreResponse>> FetchMerchantStore()
@@ -865,6 +1162,24 @@ namespace ChoziShopForWindows.ViewModels
                 return await baseApi.GetWindowsAccountStores(SavedMerchant.OnlineMerchantId);
             }
             return new List<StoreResponse>();
+        }
+
+        async Task<List<CategorySectionResponse>> FetchStoreCategories(long onlineStoreId)
+        {
+            if (SavedMerchant != null)
+            {
+                var baseApi = new BaseApi(savedMerchant.AuthToken);
+                return await baseApi.GetCategorySections(onlineStoreId);
+            }
+            return new List<CategorySectionResponse>();
+        }
+
+        private void ActivateMerchantSession(WindowsSessionResponse sessionResponse)
+        {
+            if (barcodeGenerator != null)
+            {
+                barcodeGenerator.ActivateMerchantSession(sessionResponse);
+            }
         }
     }
 }

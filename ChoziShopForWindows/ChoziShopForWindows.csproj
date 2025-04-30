@@ -41,6 +41,8 @@
     <None Remove="Resources\Images\today_icon.png" />
     <None Remove="Resources\Images\top_left_icon.png" />
     <None Remove="Resources\Images\top_right_icon.png" />
+    <None Remove="Resources\Images\user_active_icon.png" />
+    <None Remove="Resources\Images\user_unknown_icon.png" />
     <None Remove="Resources\Images\warning_icon.png" />
   </ItemGroup>
 
@@ -105,6 +107,8 @@
     <Resource Include="Resources\Images\today_icon.png" />
     <Resource Include="Resources\Images\top_left_icon.png" />
     <Resource Include="Resources\Images\top_right_icon.png" />
+    <Resource Include="Resources\Images\user_active_icon.png" />
+    <Resource Include="Resources\Images\user_unknown_icon.png" />
     <Resource Include="Resources\Images\warning_icon.png" />
   </ItemGroup>
 

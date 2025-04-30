@@ -13,6 +13,11 @@ namespace ChoziShopForWindows.Data
         IRepository<UnSyncedObject> UnSyncedObjects { get; }
         IRepository<Merchant> Merchants { get; }
         IRepository<Store> Stores { get; }
+
+        IRepository<CategorySection> CategorySections { get; }
+
+        IRepository<MerchantSession> MerchantSessions { get; }
+
         Task SaveAsync();
         void Rollback();
 
@@ -20,5 +25,13 @@ namespace ChoziShopForWindows.Data
         Task<Merchant> SaveAndReturnMerchantAsync(Merchant merchant);
         
         Task<Store> SaveAndReturnStoreAsync(Store store);
+
+        Task<CategorySection> AddCategorySectionAsync(CategorySection categorySection);
+         
+        Task AddCategoryProductAsync(CategoryProduct categoryProduct);
+
+        Task CreateMerchantSessionAsync(MerchantSession merchantSession);
+
+        Task UpdateMerchantSession(MerchantSession merchantSession);    
     }
 }

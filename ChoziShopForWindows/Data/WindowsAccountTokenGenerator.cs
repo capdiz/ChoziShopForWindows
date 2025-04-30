@@ -20,5 +20,15 @@ namespace ChoziShopForWindows.Data
 
             return $"{machineName}-{randomText}-{DateTime.Now.Ticks}";
         }
+
+        public string generateLoginToken()
+        {
+            string machineName = WebUtility.UrlEncode(Environment.MachineName);
+            string randomText = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .TrimEnd('=');
+            return $"{machineName}-{randomText}-{DateTime.Now.Ticks}";
+        }
     }
 }

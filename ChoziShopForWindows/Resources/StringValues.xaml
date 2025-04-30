@@ -41,10 +41,13 @@
     <system:String x:Key="NoAccountHeader">Looks like no Merchant account has been activated on your computer.</system:String>
     
     <system:String x:Key="StoreKeeperLoginHeader">
-        Login - Keeper
+        For Keeper
     </system:String>
     <system:String x:Key="MerchantAccountLoginHeader">
-        Login - Merchant 
+        For Merchant 
+    </system:String>
+    <system:String x:Key="UserLoginHeader">
+        User Account Login
     </system:String>
     <system:String x:Key="UserNameHeader">User name</system:String>
     <system:String x:Key="PasswordHeader">Password</system:String>
@@ -60,4 +63,11 @@
     <system:String x:Key="StoreDetailsHeader">Store details found. Fetching shop details..</system:String>
     <system:String x:Key="InventoriesHeader">Loading inventory...</system:String>
     <system:String x:Key="CategoriesHeader">Loading product categories...</system:String>
+    <system:String x:Key="NoKeepersHeader">Your store currently has no store keepers.</system:String>
+    <system:String x:Key="InviteKeeperHeader">Invite a store keeper</system:String>
+    <system:String x:Key="PhoneNumberHeader">Phone Number</system:String>
+    <system:String x:Key="InvitationSmsHeader">Send invitation code sms</system:String>
+    <system:String x:Key="InvitationCodeHeader">Provide the invitation code sent to your phone to activate your ChoziShop account.</system:String>
+    <system:String x:Key="CodePlaceHolder">Enter verification code</system:String>
+    <system:String x:Key="VerifyKeeperHeader">Verify Keeper Account</system:String>
 </ResourceDictionary>

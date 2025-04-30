@@ -29,10 +29,20 @@ namespace ChoziShopForWindows.MerchantsApi
 
         protected async Task<T> GetAsync<T>(string endpoint)
         {
-            var response = await _httpClient.GetAsync($"{BASE_URL}/{endpoint}");
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<T>(content) ?? throw new InvalidOperationException("Deserialization returned null.");
+            try
+            {
+
+                var response = await _httpClient.GetAsync($"{BASE_URL}/{endpoint}");
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<T>(content) ?? throw new InvalidOperationException("Deserialization returned null.");
+            }
+            catch 
+            {
+                // Handle the exception (e.g., log it, rethrow it, etc.)
+                return default;
+            }
+
         }
 
         protected async Task<List<T>> GetListAsync<T>(string endpoint)
@@ -40,13 +50,19 @@ namespace ChoziShopForWindows.MerchantsApi
             Debug.WriteLine($"Connecting to {BASE_URL}/{endpoint}");
             try
             {
+                var settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore,
+                    DateParseHandling = DateParseHandling.None
+                };
                 var response = await _httpClient.GetAsync($"{BASE_URL}/{endpoint}");
                 response.EnsureSuccessStatusCode();
                 var jsonContent = await response.Content.ReadAsStringAsync();
                 Debug.WriteLine($"Response content: {jsonContent}");
-                return JsonConvert.DeserializeObject<List<T>>(jsonContent);
+                return JsonConvert.DeserializeObject<List<T>>(jsonContent, settings: settings);
             }
-            catch (Exception ex)
+            catch (JsonException ex)
             {
                 // Handle the exception (e.g., log it, rethrow it, etc.)
                 throw new Exception("Error fetching list: " + ex.Message);
@@ -55,12 +71,50 @@ namespace ChoziShopForWindows.MerchantsApi
 
         protected async Task<T> PostAsync<T>(string endpoint, T data)
         {
-            var json = JsonConvert.SerializeObject(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(endpoint, content);
-            response.EnsureSuccessStatusCode();
-            var responseData = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<T>(responseData) ?? throw new InvalidOperationException("Deserialization returned null.");
+            try
+            {
+                var json = JsonConvert.SerializeObject(data);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync(endpoint, content);
+                response.EnsureSuccessStatusCode();
+                var responseData = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<T>(responseData) ?? throw new InvalidOperationException("Deserialization returned null.");
+            }
+            catch (HttpRequestException ex)
+            {
+                // Handle the exception (e.g., log it, rethrow it, etc.)
+                throw new Exception("Error posting data: " + ex.Message);
+            }
+        
         }
+
+        protected async Task<T> PatchAsync<T>(string endPoint, T data)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(data);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PatchAsync(endPoint, content);
+                if (Convert.ToInt32(response.StatusCode) == 202)
+                {
+                    response.EnsureSuccessStatusCode();
+                    var responseData = await response.Content.ReadAsStringAsync();
+
+                    Debug.WriteLine("Receiving response: " + responseData);
+                    return JsonConvert.DeserializeObject<T>(responseData) ?? throw new InvalidOperationException("Deserialization returned null.");
+                }
+                else
+                {
+                    Debug.WriteLine("Error: " + response.StatusCode);
+                    return default;
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                // Handle the exception (e.g., log it, rethrow it, etc.)
+                throw new Exception("Error patching data: " + ex.Message);
+            }
+        }
+
     }
 }

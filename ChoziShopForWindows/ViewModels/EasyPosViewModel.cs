@@ -30,7 +30,7 @@ namespace ChoziShopForWindows.ViewModels
 
         private void ShowLoginDialog()
         {
-            Dialog.Show(new LoginDialog());
+            Dialog.Show(new CreateMerchantAccountDialog());
         }
     }
 }

@@ -17,11 +17,11 @@ using System.Windows.Shapes;
 namespace ChoziShopForWindows.Views
 {
     /// <summary>
-    /// Interaction logic for LoginDialog.xaml
+    /// Interaction logic for MerchantLoginDialog.xaml
     /// </summary>
-    public partial class LoginDialog : Border
+    public partial class UserLoginDialog : Border
     {
-        public LoginDialog()
+        public UserLoginDialog()
         {
             InitializeComponent();
         }

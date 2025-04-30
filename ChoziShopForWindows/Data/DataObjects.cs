@@ -21,12 +21,16 @@ namespace ChoziShopForWindows.Data
             UnSyncedObjects = new Repository<UnSyncedObject>(_context);
             Merchants = new MerchantRepository(_context);
             Stores = new Repository<Store>(_context);
+            CategorySections = new Repository<CategorySection>(_context);
+            MerchantSessions = new Repository<MerchantSession>(_context);
         }
 
         public IRepository<UnSyncedObject> UnSyncedObjects { get; }
 
         public IRepository<Merchant> Merchants { get; }
         public IRepository<Store> Stores { get; }
+        public IRepository<CategorySection> CategorySections { get; }
+        public IRepository<MerchantSession> MerchantSessions { get; }
 
         public async Task SaveAsync()
         {
@@ -69,6 +73,58 @@ namespace ChoziShopForWindows.Data
             catch (Exception ex)
             {
                 throw new Exception("Error saving and returning store: " + ex.Message);
+            }
+        }
+
+        public async Task<CategorySection> AddCategorySectionAsync(CategorySection categorySection)
+        {
+            try
+            {
+                categorySection = await CategorySections.SaveAndReturnEntityAsync(categorySection);
+                await _context.SaveChangesAsync();
+                return categorySection;
+            }           
+            catch (Exception ex)
+            {
+                throw new Exception("Error adding category section: " + ex.Message);
+            }
+        }
+
+        public async Task AddCategoryProductAsync(CategoryProduct categoryProduct)
+        {
+            try
+            {
+                await _context.AddAsync(categoryProduct);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error adding category product: " + ex.Message);
+            }
+        }
+
+        public async Task CreateMerchantSessionAsync(MerchantSession merchantSession)
+        {
+            try
+            {
+                await _context.AddAsync(merchantSession);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error creating merchant session: " + ex.Message);
+            }
+        }
+
+        public async Task UpdateMerchantSession(MerchantSession merchantSession)
+        {
+            try
+            {
+                await MerchantSessions.UpdateAsync(merchantSession);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error updating merchant session: " + ex.Message);
             }
         }
 

@@ -58,6 +58,13 @@ public partial class MainWindow
             Source = new Uri("pack://application:,,,/Resources/Style/CustomColours.xaml")
         };
         Resources.MergedDictionaries.Add(customColor);
+
+        // Converter resources
+        ResourceDictionary converters = new ResourceDictionary()
+        {
+            Source = new Uri("pack://application:,,,/Resources/Converters/ChoziShopConverters.xaml")
+        };
+        Resources.MergedDictionaries.Add(converters);
     }
 
 

@@ -22,17 +22,29 @@ using Image = System.Windows.Controls.Image;
 using System.Windows;
 using System.Windows.Media;
 using Newtonsoft.Json;
+using System.Runtime.CompilerServices;
+using ChoziShopForWindows.MerchantsApi;
 
 namespace ChoziShopForWindows.Data
 {
     class BarcodeGenerator
     {
-        public static readonly string BASE_URL = "https://merchants.chozishop.com";
-        public static readonly string AUTHENTICATION_URL = $"{BASE_URL}/windows_accounts";
+        public static readonly string AUTHENTICATION_URL = $"{HttpService.BASE_URL}/windows_accounts";
+        public static readonly string MERCHANT_AUTHORIZATION_URI = $"windows_sessions/unknown/validate_session?device_token=";        
         private string _deviceToken;
+        private string _loginToken;
+        private string _sessionAuthToken;
+
+        private long activeSessionId;
+        private bool _isMerchantSessionActive;
+
+        private BaseApi _baseApi;
+
         private readonly Timer _pollingTimer;
+        private readonly Timer _authorizationTimer;
 
         public EventHandler<MerchantResponse> MerchantResponseHandler;
+        public EventHandler<WindowsSessionResponse> WindowsSessionResponseHandler;
 
         public BarcodeGenerator()
         {
@@ -40,12 +52,92 @@ namespace ChoziShopForWindows.Data
             _pollingTimer.Elapsed += PollForAuthentication;
         }
 
+        public BarcodeGenerator(BaseApi baseApi)
+        {
+            _baseApi = baseApi;
+            _authorizationTimer = new Timer(2000);
+            _authorizationTimer.Elapsed += PollForAuthorization;
+        }
+
+       public void SetIsMerchantSessionActive(bool isActive)
+        {
+            _isMerchantSessionActive = isActive;
+        }
+
+        public void SetActiveSessionId(long sessionId)
+        {
+            activeSessionId = sessionId;
+        }
+
+        public void SetSessionAuthToken(string sessionAuthToken)
+        {
+            _sessionAuthToken = sessionAuthToken;
+        }
+
+        public BitmapSource GenerateLoginBarcode()
+        {
+            // geneerate random token in qrcode for authentication purposes
+            _loginToken = new WindowsAccountTokenGenerator().generateLoginToken();
+
+            // string value for our qr code
+            var qrcodePayload = string.Empty;
+            if (_isMerchantSessionActive)
+            {
+                qrcodePayload = $"validate-{_sessionAuthToken}";
+            }
+            else
+            {
+                qrcodePayload =
+                     $"login-{_loginToken}";
+            }
+
+            // generate qr code
+            var writer = new BarcodeWriter
+            {
+                Format = BarcodeFormat.QR_CODE,
+                Options = new EncodingOptions
+                {
+                    Height = 120,
+                    Width = 120,
+                    Margin = 1
+                }
+            };
+
+            var bitmap = writer.Write(qrcodePayload);
+
+            // let us load our logo image
+            var logo = LoadBitmapFromFile();            
+            _authorizationTimer.Start();
+
+            if (logo == null) return BitmapToImageSource(bitmap);
+
+            // calculate logo size (20% of the total qrcode image size)
+            var logoWidth = (int)(bitmap.Width * 0.2);
+            var logoHeight = (int)(bitmap.Height * 0.2);
+
+            // create drawing visual
+            var drawingVisual = new DrawingVisual();
+            using (var drawingContext = drawingVisual.RenderOpen())
+            {
+                // draw qr code
+                drawingContext.DrawImage(BitmapToImageSource(bitmap), new Rect(0, 0, bitmap.Width, bitmap.Height));
+                // Draw centered logo
+                var logoRect = new Rect((bitmap.Width - logoWidth) / 2, (bitmap.Height - logoHeight) / 2, logoWidth, logoHeight);
+                drawingContext.DrawImage(logo, logoRect);
+            }
+
+            // render visual to bitmap
+            var finalBitmap = new RenderTargetBitmap(bitmap.Width, bitmap.Height, 96, 96, PixelFormats.Pbgra32);
+            finalBitmap.Render(drawingVisual);
+            return finalBitmap;
+        }
+
         public BitmapSource GenerateBarcodeImage()
         {
             _deviceToken = new WindowsAccountTokenGenerator().generateWindowsAccountToken();
 
             // string value for our qr code
-            var qrcodePayload = $"{_deviceToken}";
+            var qrcodePayload = $"create-{_deviceToken}";
 
             // generate qr code
             var writer = new BarcodeWriter
@@ -63,7 +155,9 @@ namespace ChoziShopForWindows.Data
 
             // let us load our logo image
             var logo = LoadBitmapFromFile();
+
             _pollingTimer.Start();
+
             if (logo == null) return BitmapToImageSource(bitmap);
 
             // calculate logo size (20% of the total qrcode image size)
@@ -123,6 +217,34 @@ namespace ChoziShopForWindows.Data
             }
         }
 
+        private async void PollForAuthorization(object sender, ElapsedEventArgs e)
+        {
+            if (!_isMerchantSessionActive)
+            {
+                var isAuthorized = await IsAuthorized();
+                Debug.WriteLine("Polling for authorization: Authorization status: " + isAuthorized);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (isAuthorized)
+                    {
+                        Status = "Authorized";
+                        _authorizationTimer.Stop();
+                        //QrImage.Source = null;
+                    }
+                });
+            }
+            else
+            {
+                var response = await ConnectToSession();
+                if (response != null)
+                {
+                    Debug.WriteLine("Authorization successfully completed!");
+                    _authorizationTimer.Stop();
+                    WindowsSessionResponseHandler?.Invoke(this, response);
+                }
+            }
+        }
+
         private async void PollForAuthentication(object sender, ElapsedEventArgs e)
         {
             var isAuthenticated = await CheckAuthentication(_deviceToken);
@@ -131,7 +253,7 @@ namespace ChoziShopForWindows.Data
             {
                 if (isAuthenticated)
                 {
-                    Status = "Authentciation";
+                    Status = "Authentication";
                     _pollingTimer.Stop();
                     //QrImage.Source = null;
                 }
@@ -141,7 +263,7 @@ namespace ChoziShopForWindows.Data
         private async Task<bool> CheckAuthentication(string deviceToken)
         {
             var client = new HttpClient();
-            var response = await client.GetAsync($"{BASE_URL}/windows_accounts/0/?windows_device_token={deviceToken}");
+            var response = await client.GetAsync($"{HttpService.BASE_URL}/windows_accounts/0/?windows_device_token={deviceToken}");
             Debug.WriteLine(response.Content.ReadAsStringAsync().Result, " Status: " + response.StatusCode);
             if (response.StatusCode == System.Net.HttpStatusCode.Found)
             {
@@ -155,5 +277,41 @@ namespace ChoziShopForWindows.Data
             return response.IsSuccessStatusCode;
         }
 
+        private async Task<bool> IsAuthorized()
+        {
+            var client = new HttpClient();
+            var response = await _baseApi.ValidateWindowsSession(_loginToken, MERCHANT_AUTHORIZATION_URI);
+            if (response != null)
+            {
+                Debug.WriteLine("WindowsSession found with status: " + response.Status);
+                response.Status = "pending";
+                WindowsSessionResponseHandler?.Invoke(this, response);
+                return true;
+            }
+
+            return false;
+        }
+
+        private async Task<WindowsSessionResponse> ConnectToSession()
+        {                        
+            return await _baseApi.RestartMerchantSession(_sessionAuthToken);
+        }
+
+        public async void ActivateMerchantSession(WindowsSessionResponse sessionResponse)
+        {
+            var client = new HttpClient();
+            var response = await _baseApi.ActivateWindowsSession(sessionResponse);
+            if (response != null)
+            {
+                Debug.WriteLine("WindowsSession successfully activated with status: " + response.Status);
+                WindowsSessionResponseHandler?.Invoke(this, response);
+            }
+
+            else
+            {
+                Debug.WriteLine("WindowsSession not found");
+
+            }
+        }
     }
 }

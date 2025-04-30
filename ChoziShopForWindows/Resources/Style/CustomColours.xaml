@@ -9,6 +9,12 @@
     <Color x:Key="SearchBoxColor">#EEEEEE</Color>
     <Color x:Key="SearchFontColor">#263238</Color>
     <Color x:Key="ProgressBarTextColor">#E0E0E0</Color>
+    <Color x:Key="BaseTextColor">#263238</Color>
+    <Color x:Key="BlueGray500">#607D8B</Color>
+    <Color x:Key="GrayWhiteColor">#FAFAFA</Color>
+    <Color x:Key="Teal800">#00695C</Color>
+    <Color x:Key="Cyan900">#006064</Color>
+    <Color x:Key="Blue900">#0D47A1</Color>
     <SolidColorBrush x:Key="DefaultGroupBoxHeaderBrush" Color="{DynamicResource DefaultHeaderColor}"/>
     <SolidColorBrush x:Key="SalesGroupBoxBrush" Color="{DynamicResource SalesGroupBoxColor}" />
     <SolidColorBrush x:Key="TotalAmountHeaderBrush" Color="{DynamicResource AmountHeader}" />
@@ -18,4 +24,10 @@
     <SolidColorBrush x:Key="SearchBoxColorBrush" Color="{DynamicResource SearchBoxColor}" />
     <SolidColorBrush x:Key="SearchFontBrush" Color="{DynamicResource SearchFontColor}" />
     <SolidColorBrush x:Key="ProgressBarBrush" Color="{DynamicResource ProgressBarTextColor}" />
+    <SolidColorBrush x:Key="BaseTextBrush" Color="{DynamicResource BaseTextColor}" />
+    <SolidColorBrush x:Key="BlueGray500Brush" Color="{DynamicResource BlueGray500}" />
+    <SolidColorBrush x:Key="GrayWhiteBrush" Color="{DynamicResource GrayWhiteColor}" />
+    <SolidColorBrush x:Key="Teal800Brush" Color="{DynamicResource Teal800}" />
+    <SolidColorBrush x:Key="Cyan900Brush" Color="{DynamicResource Cyan900}" />
+    <SolidColorBrush x:Key="Blue900Brush" Color="{DynamicResource Blue900}" />
 </ResourceDictionary>

@@ -19,6 +19,7 @@
                 <ResourceDictionary Source="/Resources/Themes/BaseLight.xaml" />
                 <!--Primary-->
                 <ResourceDictionary Source="/Resources/Style/Primary/Primary.xaml" />
+                <ResourceDictionary Source="/Resources/Converters/ChoziShopConverters.xaml" />
 
             </ResourceDictionary.MergedDictionaries>
 
