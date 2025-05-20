@@ -18,6 +18,12 @@ namespace ChoziShopForWindows.Commands
             _canExecute = canExecute;
         }
 
+        public RelayCommand(Func<Task> ayncExecute, Func<object, bool> canExecute = null)
+        {
+            _execute = async _ => await ayncExecute();
+            _canExecute = canExecute;
+        }
+
         public bool CanExecute(object parameter)
         {
             return _canExecute?.Invoke(parameter) ?? true;
@@ -33,5 +39,6 @@ namespace ChoziShopForWindows.Commands
             add => CommandManager.RequerySuggested += value;
             remove => CommandManager.RequerySuggested -= value;
         }
+
     }
 }

@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:ChoziShopForWindows.ViewModels"
              xmlns:views="clr-namespace:ChoziShopForWindows.Views">
     <Application.Resources>
+
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
@@ -15,11 +16,13 @@
                 <ResourceDictionary Source="/Resources/Style/Colour.xaml" />
                 <ResourceDictionary Source="/Resources/Style/Geometry.xaml" />
                 <ResourceDictionary Source="/Resources/Style/Style.xaml" />
+                <ResourceDictionary Source="/Resources/Style/Validation.xaml" />
                 <!--Theme-->
                 <ResourceDictionary Source="/Resources/Themes/BaseLight.xaml" />
                 <!--Primary-->
                 <ResourceDictionary Source="/Resources/Style/Primary/Primary.xaml" />
                 <ResourceDictionary Source="/Resources/Converters/ChoziShopConverters.xaml" />
+                <ResourceDictionary Source="/Resources/Style/RoundedButtonExtension.xaml" />
 
             </ResourceDictionary.MergedDictionaries>
 
@@ -31,6 +34,7 @@
             </DataTemplate>
 
             <FontFamily x:Key="IconFont">pack://application:,,,/Resource/#iconfont.ttf</FontFamily>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

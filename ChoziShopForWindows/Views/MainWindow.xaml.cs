@@ -65,6 +65,13 @@ public partial class MainWindow
             Source = new Uri("pack://application:,,,/Resources/Converters/ChoziShopConverters.xaml")
         };
         Resources.MergedDictionaries.Add(converters);
+
+        // RoundedButton extension
+        ResourceDictionary roundedButton = new ResourceDictionary()
+        {
+            Source = new Uri("pack://application:,,,/Resources/Style/RoundedButtonExtension.xaml")
+        };
+        Resources.MergedDictionaries.Add(roundedButton);
     }
 
 

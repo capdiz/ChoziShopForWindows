@@ -17,6 +17,8 @@ namespace ChoziShopForWindows.MerchantsApi
     {
         private const string WSS_SESSION_URL = "wss://merchants.chozishop.com/cable?session_auth_token=";
         private const string SESSION_URL = "https://merchants.chozishop.com/restart_merchant_session/";
+        private const string STORES_URL = $"{BASE_URL}/stores";
+        
 
         private ClientWebSocket _webSocket;
         private CancellationTokenSource _cts;
@@ -72,6 +74,47 @@ namespace ChoziShopForWindows.MerchantsApi
             return await PatchAsync<WindowsSessionResponse>($"{restartUrl}", data);
         }
 
+        public async Task<SerializedOrder> ProcessMobileMoneyOrder(Order order, string accountType)
+        {
+            string jsonOrderProducts = JsonConvert.SerializeObject(order.OrderProductItems, Formatting.Indented);
+            var serializedOrder = new SerializedOrder()
+            {
+                StoreId = order.StoreId,
+                PreferredPaymentMode = order.PreferredPaymentMode,
+                OrderStatus = order.OrderStatus,
+                TotalAmountCents = order.TotalAmountCents,
+                Currency = order.TotalAmountCurrency,                
+                OrderCategoryProducts = jsonOrderProducts
+            };
+            Debug.WriteLine("Json order products: "+jsonOrderProducts);
+            var createOrderUrl = $"{STORES_URL}/{serializedOrder.StoreId}/orders?account_type={accountType}";
+            return await PostAsync<SerializedOrder>(createOrderUrl, serializedOrder);
+        }
+
+        public async Task<AirtelPaymentCollectionRequest> InitiatePaymentRequest(string phoneNumber, decimal amount)
+        {
+            Debug.WriteLine("Initiating AirtelPay request");
+            var collectionRequest = new AirtelPaymentCollectionRequest
+            {
+                Msisdn = phoneNumber,
+                Amount = 300           
+            };
+            return await PaymentCollectionRequestAsync(collectionRequest);
+        }
+
+        public async Task<PaymentAuthRequest> CreatePaymentAuth(string email, string accessId)
+        {
+            var paymentAuth = new PaymentAuthRequest();
+            paymentAuth.Email = email;
+            paymentAuth.AccessId = accessId;
+            return await GeneratePaymentAuthentication<PaymentAuthRequest>(paymentAuth);
+        }
+
+        //public async Task<CollectionRequest> GetTransactionStatus(AirtelPayCollection airtelPayCollection)
+        //{
+        //    return await GetTransactionStatusAsync<CollectionRequest>(airtelPayCollection);
+        //}
+
         //public async Task CheckForActiveSession(string sessionAuthToken)
         //{
         //    await _semaphoreSlim.WaitAsync();
@@ -95,7 +138,7 @@ namespace ChoziShopForWindows.MerchantsApi
 
         //        // Add required headers for Action cable            
         //        _webSocket.Options.SetRequestHeader("Origin", "https://merchants.chozishop.com");
-                
+
 
         //        Debug.WriteLine("Connecting to session with token: " + sessionAuthToken);
         //        await _webSocket.ConnectAsync(new Uri($"{SESSION_URL}{sessionAuthToken}"), _cts.Token);
@@ -145,7 +188,7 @@ namespace ChoziShopForWindows.MerchantsApi
         //    {
         //        Debug.WriteLine($"I must have received something i don't know abot");
         //    }
-            
+
         //}
 
         //private async Task SendInternalWebSocketMessage(string message, CancellationToken cancellationToken)

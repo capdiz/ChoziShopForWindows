@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ChoziShopForWindows.ViewModels;
+using HandyControl.Interactivity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,13 +18,19 @@ using System.Windows.Shapes;
 namespace ChoziShopForWindows.Views
 {
     /// <summary>
-    /// Interaction logic for Order.xaml
+    /// Interaction logic for OrderCheckoutDialog.xaml
     /// </summary>
-    public partial class Order : UserControl
+    public partial class OrderCheckoutDialog : Border
     {
-        public Order()
+        public OrderCheckoutDialog(OrdersViewModel ordersViewModel)
         {
             InitializeComponent();
+            DataContext = ordersViewModel;
+        }
+
+        public void close()
+        {
+            ControlCommands.Close.Execute(true, this);
         }
     }
 }

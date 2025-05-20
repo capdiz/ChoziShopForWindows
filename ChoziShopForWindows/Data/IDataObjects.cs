@@ -13,10 +13,14 @@ namespace ChoziShopForWindows.Data
         IRepository<UnSyncedObject> UnSyncedObjects { get; }
         IRepository<Merchant> Merchants { get; }
         IRepository<Store> Stores { get; }
-
+        IRepository<CategoryProduct> CategoryProducts { get; }
         IRepository<CategorySection> CategorySections { get; }
 
         IRepository<MerchantSession> MerchantSessions { get; }
+
+        IRepository<Order> ShopOrders { get; }
+        IRepository<PaymentAuth> PaymentAuths { get; }
+        IRepository<AirtelPayCollection> AirtelCollections { get; }
 
         Task SaveAsync();
         void Rollback();
@@ -32,6 +36,11 @@ namespace ChoziShopForWindows.Data
 
         Task CreateMerchantSessionAsync(MerchantSession merchantSession);
 
-        Task UpdateMerchantSession(MerchantSession merchantSession);    
+        Task UpdateMerchantSession(MerchantSession merchantSession);
+        Task<IEnumerable<CategoryProduct>> SearchCategoryProductsAsync(string searchQuery);
+        Task<PaymentAuth> GetPaymentAuth();
+        Task<PaymentAuth> CreatePaymentAuth(PaymentAuth paymentAuth);
+        Task<AirtelPayCollection> CreateAirtelPayCollection(AirtelPayCollection airtelPayCollection);
+        Task<bool> UpdateAirtelPayCollection(AirtelPayCollection airtelPayCollection);
     }
 }

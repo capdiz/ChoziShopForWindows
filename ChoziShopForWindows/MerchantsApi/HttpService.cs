@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using ChoziShop.Data.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +13,10 @@ namespace ChoziShopForWindows.MerchantsApi
     public abstract class HttpService
     {
         public const string BASE_URL = "https://merchants.chozishop.com";
+        public const string BASE_PAYMENTS_URL = "https://payments.chozishop.com/";
+        private const string BASE_PAYMENTS_AUTH_URL = "https://payments.chozishop.com/authorizations";
+        private const string REQUEST_TO_COLLECT_URL = $"{BASE_PAYMENTS_URL}airtel_pays/collections/request-to-collect";
+        private const string REQUEST_TO_DISBURSE_URL = $"{BASE_PAYMENTS_URL}/airtel_pays/disbursements/request-to-disburse";
         private readonly HttpClient _httpClient;
         
         protected HttpService(string authToken = null)
@@ -24,6 +29,7 @@ namespace ChoziShopForWindows.MerchantsApi
             if (!string.IsNullOrEmpty(authToken))
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authToken);
+                
             }
         }
 
@@ -33,8 +39,9 @@ namespace ChoziShopForWindows.MerchantsApi
             {
 
                 var response = await _httpClient.GetAsync($"{BASE_URL}/{endpoint}");
+                
                 response.EnsureSuccessStatusCode();
-                var content = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync();                
                 return JsonConvert.DeserializeObject<T>(content) ?? throw new InvalidOperationException("Deserialization returned null.");
             }
             catch 
@@ -43,6 +50,23 @@ namespace ChoziShopForWindows.MerchantsApi
                 return default;
             }
 
+        }
+
+        protected async Task<T> GetTransactionStatusAsync<T>(AirtelPayCollection airtelPayCollection)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{BASE_PAYMENTS_URL}airtel_pays/collections/{airtelPayCollection.AirtelPayCollectionRequestId}/transaction-enquiry");
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<T>(content) ?? throw new InvalidOperationException("Deserialization returned null.");
+            }
+            catch (Exception ex)
+            {
+                
+                    throw new Exception("Error getting transaction status: " + ex.Message);
+                
+            }
         }
 
         protected async Task<List<T>> GetListAsync<T>(string endpoint)
@@ -84,9 +108,68 @@ namespace ChoziShopForWindows.MerchantsApi
             {
                 // Handle the exception (e.g., log it, rethrow it, etc.)
                 throw new Exception("Error posting data: " + ex.Message);
-            }
-        
+            }        
         }
+
+        protected async Task<T> GeneratePaymentAuthentication<T> (T data)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(data);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync(BASE_PAYMENTS_AUTH_URL, content);               
+                response.EnsureSuccessStatusCode();
+                var responseData = await response.Content.ReadAsStringAsync();                
+                return JsonConvert.DeserializeObject<T>(responseData) ?? throw new InvalidOperationException("Deserialization returned null.");
+            }
+            catch (HttpRequestException ex)
+            {
+                // Handle the exception (e.g., log it, rethrow it, etc.)
+                throw new Exception("Error posting data: " + ex.Message);
+            }
+        }
+
+
+        protected async Task<T> PaymentCollectionRequestAsync<T>(T data)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(data);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync(REQUEST_TO_COLLECT_URL, content);
+                response.EnsureSuccessStatusCode();
+                var responseData = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Response content: {responseData}");
+                return JsonConvert.DeserializeObject<T>(responseData) ?? throw new InvalidOperationException("Deserialization returned null.");
+            }
+            catch (HttpRequestException ex)
+            {
+                // Handle the exception (e.g., log it, rethrow it, etc.)
+                throw new Exception("Error posting data: " + ex.Message);
+            }
+        }
+
+        protected async Task<T> PaymentDisbursementRequest<T>(T data)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(data);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync(REQUEST_TO_DISBURSE_URL, content);
+                Debug.WriteLine(response);
+                response.EnsureSuccessStatusCode();
+                var responseData = await response.Content.ReadAsStringAsync();
+                
+                return JsonConvert.DeserializeObject<T>(responseData) ?? throw new InvalidOperationException("Deserialization returned null.");
+            }
+            catch (HttpRequestException ex)
+            {
+                // Handle the exception (e.g., log it, rethrow it, etc.)
+                throw new Exception("Error posting data: " + ex.Message);
+            }
+        }
+
+       
 
         protected async Task<T> PatchAsync<T>(string endPoint, T data)
         {

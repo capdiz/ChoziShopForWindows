@@ -8,9 +8,8 @@
              xmlns:vm="clr-namespace:ChoziShopForWindows.ViewModels"
              Background="{DynamicResource RegionBrush}"
              mc:Ignorable="d">
-    <UserControl.DataContext>
-        <vm:HomeViewModel/>
-    </UserControl.DataContext>
+
+  
     <hc:TransitioningContentControl>
         <ScrollViewer>
             <StackPanel Margin="10">
@@ -27,8 +26,9 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <hc:Badge Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"  BadgeMargin="0,-5,-15,0" Text="12,000 Ugx" Style="{DynamicResource BadgeInfo}">
-                                    <Button Content="Today's sales" Foreground="#00695C" Margin="0,0,50,0" />
+                                <hc:Badge Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"  BadgeMargin="0,-5,-15,0" 
+                                          Text="{Binding TotalSalesAmountByDay, Mode=OneWay}" Style="{DynamicResource BadgeInfo}">
+                                    <Button Content="Today's sales" Command="{Binding UpdateSalesAmountCommand}" Foreground="#00695C" Margin="0,0,50,0" />
                                 </hc:Badge>
                                 <hc:SideMenu Grid.Row="1"  Margin="5">
                                     
@@ -65,7 +65,8 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <hc:Badge Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"  BadgeMargin="0,-5,-15,0" Value="12" Style="{DynamicResource BadgeSuccess}">
+                                <hc:Badge Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"  BadgeMargin="0,-5,-15,0" Value="{Binding CustomerOrdersCount}"
+                                          Style="{DynamicResource BadgeSuccess}">
                                     <Button Content="Today's closed orders" Foreground="#00695C" Margin="0,0,5,0" />
                                 </hc:Badge>
                                 <hc:SideMenu Grid.Row="1"  Margin="5">

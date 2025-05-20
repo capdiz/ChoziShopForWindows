@@ -143,4 +143,6 @@
         <Setter Property="ItemContainerStyle" Value="{StaticResource ListBoxItemTransparent}"/>
     </Style>
 
+  
+
 </ResourceDictionary>

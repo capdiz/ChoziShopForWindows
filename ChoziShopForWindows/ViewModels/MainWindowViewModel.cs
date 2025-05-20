@@ -27,15 +27,26 @@ using HandyControl.Interactivity;
 using ChoziShopForWindows.MerchantsApi;
 using ChoziShopForWindows.models;
 using ChoziShopForWindows.Services;
+using Microsoft.Extensions.DependencyInjection;
+using ChoziShopSharedConnectivity.Shared;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Threading.Tasks.Dataflow;
 
 namespace ChoziShopForWindows.ViewModels
 {
     public class MainWindowViewModel : ObservableObject, INotifyPropertyChanged
     {
+        private readonly ILogger _logger;
+        private readonly IDataObjects _dataObjects;
+        private readonly InternetConnectivityMonitorService _internetConnectivityMonitorService;
+        private readonly BufferBlock<ConnectivityStatus> _statusQueue = new BufferBlock<ConnectivityStatus>();
+
         private String _currentTime;
         private DispatcherTimer _dispatchTimer;
         private DatabaseManager choziShopDatabaseManager;
-
+        private IServiceScope _currentScope;
+        private IAuthTokenProvider _authTokenProvider;
+       
         private SessionManager _sessionManager;
 
         private BitmapSource _qrCodeImage;
@@ -46,8 +57,12 @@ namespace ChoziShopForWindows.ViewModels
         // know if app is having an active user session
         private bool isUserSessionActive = false;
 
-
         private bool _isStoreHavingKeeperAccounts = false;
+        private bool _isInternetConnected;
+        private bool _isXmppConnected;
+        private bool _isInternetNotConnected;
+
+        private ConnectivityStatus _connectivityStatus;
 
         private string _selectedViewName = "HomeView";
         private List<string> _countryOfOperations;
@@ -55,6 +70,7 @@ namespace ChoziShopForWindows.ViewModels
         private CreateMerchantAccountDialog CreateMerchantAccountDialog;
         private UserLoginDialog UserLoginDialog;
 
+        IServiceProvider _services;
 
         private Visibility _isHomeViewVisible = Visibility.Visible;
         private Visibility _isEasyPosViewVisible = Visibility.Collapsed;
@@ -78,37 +94,21 @@ namespace ChoziShopForWindows.ViewModels
         private string currentSessionStatus = "Inactive Session";
         private string currentUserRole = "Unknown User";
 
-
         private object _currentUserControl;
-
-        private readonly ILogger _logger;
-
-
-        private readonly IDataObjects _dataObjects;
-
+       
         private BarcodeGenerator barcodeGenerator;
 
         private List<Store> _merchantStores;
 
-        public MainWindowViewModel(IDataObjects dataObjects)
+        public MainWindowViewModel(IDataObjects dataObjects, IServiceProvider services)
         {
             _logger = Log.ForContext<MainWindowViewModel>();
 
             InitializeTimer();
 
             _dataObjects = dataObjects;
-            IsEasyPosviewVisible = Visibility.Collapsed;
-            IsCreateShopViewVisible = Visibility.Collapsed;
-            IsShopsViewVisible = Visibility.Collapsed;
-            IsOrdersViewVisible = Visibility.Collapsed;
-            IsShopKeepersViewVisible = Visibility.Collapsed;
-            IsInventoryViewVisible = Visibility.Collapsed;
-            IsPaymentsViewVisible = Visibility.Collapsed;
-            IsScheduledOrdersViewVisible = Visibility.Collapsed;
-            IsDiscountsViewVisible = Visibility.Collapsed;
-            IsPromotionsViewVisible = Visibility.Collapsed;
-            IsSettingsViewVisible = Visibility.Collapsed;
-            IsProgressBarVisible = Visibility.Collapsed;
+            _services=services;
+           
 
             CountryOfOperations = new List<string>
             {
@@ -121,15 +121,41 @@ namespace ChoziShopForWindows.ViewModels
             };
 
             ShowCurrentUserControlCommand = new Commands.RelayCommand(param => ShowSelectedView(param));
-            GenerateCodeCommand = new Commands.RelayCommand(_ => GenerateCode());
+           // GenerateCodeCommand = new Commands.RelayCommand(_ => GenerateCode());
             choziShopDatabaseManager = new DatabaseManager(DbFileConfig.FullDbOPath, "Merchants");
             CurrentMerchantAccount = choziShopDatabaseManager.GetMerchant();
             IsMerchantAccountActivated = false;
             barcodeGenerator = new BarcodeGenerator();
             barcodeGenerator.MerchantResponseHandler += OnMerchantReceived;
             isMerchantSessionActive = choziShopDatabaseManager.IsMerchantSessionActive();
-            IsUserSessionActive = false;
+            IsUserSessionActive = true;
+            
+            _currentScope = _services.CreateScope();
+            _authTokenProvider = services.GetRequiredService<IAuthTokenProvider>();
+            _authTokenProvider.SetCurrentMerchantAccount(CurrentMerchantAccount);
+            _internetConnectivityMonitorService = services.GetRequiredService<InternetConnectivityMonitorService>();
+            // Subscribe to the Internet StatusChanged event
+            _internetConnectivityMonitorService.StatusChanged += OnInternetStatusChanged;
+
+            // Process queue at max 10 FPS
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    var status = await _statusQueue.ReceiveAsync();
+                    Debug.WriteLine("The status in WPF is: "+status.IsInternetConnected);
+                    UpdateConnectivityStatus(status);
+                    await Task.Delay(100); // 10 FPS
+                }
+            });
         }
+
+        private void OnInternetStatusChanged(ConnectivityStatus status)
+        {
+            _statusQueue.Post(status);           
+        }
+
+        public OrdersViewModel OrdersViewModel => _currentScope.ServiceProvider.GetRequiredService<OrdersViewModel>();
 
 
         public bool IsMerchantAccountActivated
@@ -169,6 +195,44 @@ namespace ChoziShopForWindows.ViewModels
             {
                 isUserSessionActive = value;
                 OnPropertyChanged();
+            }
+        }
+
+        public bool IsInternetConnected
+        {
+            get { return _isInternetConnected; }
+            set
+            {
+                IsInternetNotConnected = !value;
+                SetField(ref _isInternetConnected, value);
+            }
+        }
+
+        public bool IsInternetNotConnected
+        {
+            get { return _isInternetNotConnected; }
+            set
+            {
+                _isInternetNotConnected = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsXmppConnected
+        {
+            get { return _isXmppConnected; }
+            set
+            {
+                SetField(ref _isXmppConnected, value);
+            }
+        }
+
+        public ConnectivityStatus ConnectivityStatus
+        {
+            get { return _connectivityStatus; }
+            set
+            {
+                SetField(ref _connectivityStatus, value);
             }
         }
 
@@ -398,7 +462,7 @@ namespace ChoziShopForWindows.ViewModels
             {
 
                 _currentUserControl = value;
-                base.OnPropertyChanged();
+                OnPropertyChanged();
                 Debug.WriteLine("CurrentUserControl updated to: " + value?.GetType().Name);
             }
         }
@@ -524,6 +588,7 @@ namespace ChoziShopForWindows.ViewModels
                                 IsUserSessionActive = true;
                                 CurrentSessionStatus = "Active Session";
                                 CurrentUserRole = "Merchant";
+                                CurrentUserControl = _services.GetRequiredService<HomeView>();
                                 Debug.WriteLine("Merchant session successfully reactivated");
                                 UserLoginDialog.close();
                             });
@@ -554,6 +619,7 @@ namespace ChoziShopForWindows.ViewModels
                                     IsUserSessionActive = true;
                                     CurrentSessionStatus = "Active Session";
                                     CurrentUserRole = "Merchant";
+                                    CurrentUserControl = _services.GetRequiredService<HomeView>();
                                     Debug.WriteLine("Session is activated. Please wait...");
                                     UserLoginDialog.close();
                                 }
@@ -715,6 +781,7 @@ namespace ChoziShopForWindows.ViewModels
                 switch (message)
                 {
                     case "HomeView":
+                        
                         ShowHomeView(); break;
                     case "EasyPosView":
                         ShowEasyPosView(); break;
@@ -771,22 +838,12 @@ namespace ChoziShopForWindows.ViewModels
         {
             if (MerchantAccountExists())
             {
-                _logger.Information("User control is being shown.");
-                IsHomeViewVisible = Visibility.Visible;
 
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
-                IsSettingsViewVisible = Visibility.Collapsed;
-                if (!isUserSessionActive)
+                if (isUserSessionActive)
                 {
+                    CurrentUserControl = _services.GetRequiredService<HomeView>();
+                }
+                else { 
                     ShowUserLoginDialog();
                 }
             }
@@ -802,21 +859,8 @@ namespace ChoziShopForWindows.ViewModels
         {
             if (MerchantAccountExists())
             {
-                _logger.Information("Show easy pos view");
-                IsEasyPosviewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
-                IsSettingsViewVisible = Visibility.Collapsed;
-
+                Debug.WriteLine("Show easy pos view");
+                CurrentUserControl = _services.GetRequiredService<EasyPosView>();           
             }
             else
             {
@@ -830,19 +874,7 @@ namespace ChoziShopForWindows.ViewModels
         {
             if (MerchantAccountExists())
             {
-                IsShopsViewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
-                IsSettingsViewVisible = Visibility.Collapsed;
+                CurrentUserControl = _services.GetRequiredService<ShopsView>();               
             }
             else
             {
@@ -855,19 +887,8 @@ namespace ChoziShopForWindows.ViewModels
         {
             if (MerchantAccountExists())
             {
-                IsCreateShopViewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
-                IsSettingsViewVisible = Visibility.Collapsed;
+                CurrentUserControl = _services.GetRequiredService<CreateShopView>();
+               
             }
             else
             {
@@ -880,19 +901,8 @@ namespace ChoziShopForWindows.ViewModels
         {
             if (MerchantAccountExists())
             {
-                IsShopKeepersViewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
-                IsSettingsViewVisible = Visibility.Collapsed;
+                CurrentUserControl = _services.GetRequiredService<ShopKeepersView>();
+                
 
                 if (!isUserSessionActive)
                 {
@@ -910,20 +920,8 @@ namespace ChoziShopForWindows.ViewModels
         private void ShowOrdersView()
         {
             if (MerchantAccountExists())
-            {
-                IsOrdersViewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
-                IsSettingsViewVisible = Visibility.Collapsed;
+            {                
+                CurrentUserControl = _services.GetRequiredService<OrdersView>();               
             }
             else
             {
@@ -937,20 +935,9 @@ namespace ChoziShopForWindows.ViewModels
         private void ShowInventoryView()
         {
             if (MerchantAccountExists())
-            {
-                IsInventoryViewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
-                IsSettingsViewVisible = Visibility.Collapsed;
+            {                
+                CurrentUserControl = _services.GetRequiredService<InventoryView>();
+               
             }
             else
             {
@@ -963,20 +950,7 @@ namespace ChoziShopForWindows.ViewModels
         {
             if (!MerchantAccountExists())
             {
-                IsPaymentsViewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
-
-                IsSettingsViewVisible = Visibility.Collapsed;
+                CurrentUserControl = _services.GetRequiredService<PaymentsView>();               
             }
             else
             {
@@ -989,19 +963,8 @@ namespace ChoziShopForWindows.ViewModels
         {
             if (MerchantAccountExists())
             {
-                IsDiscountsViewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
-                IsSettingsViewVisible = Visibility.Collapsed;
+                CurrentUserControl = _services.GetRequiredService<DiscountsView>();
+             
             }
             else
             {
@@ -1015,19 +978,8 @@ namespace ChoziShopForWindows.ViewModels
         {
             if (MerchantAccountExists())
             {
-                IsSettingsViewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
+                CurrentUserControl=_services.GetRequiredService<SettingsView>();
+              
             }
             else
             {
@@ -1040,19 +992,9 @@ namespace ChoziShopForWindows.ViewModels
         {
             if (MerchantAccountExists())
             {
-                IsPromotionsViewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsScheduledOrdersViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsSettingsViewVisible = Visibility.Collapsed;
+                
+                CurrentUserControl = _services.GetRequiredService<PromotionsView>();
+              
             }
             else
             {
@@ -1064,20 +1006,9 @@ namespace ChoziShopForWindows.ViewModels
         private void ShowScheduledOrdersView()
         {
             if (MerchantAccountExists())
-            {
-                IsScheduledOrdersViewVisible = Visibility.Visible;
-
-                IsHomeViewVisible = Visibility.Collapsed;
-                IsEasyPosviewVisible = Visibility.Collapsed;
-                IsCreateShopViewVisible = Visibility.Collapsed;
-                IsShopsViewVisible = Visibility.Collapsed;
-                IsOrdersViewVisible = Visibility.Collapsed;
-                IsShopKeepersViewVisible = Visibility.Collapsed;
-                IsInventoryViewVisible = Visibility.Collapsed;
-                IsPaymentsViewVisible = Visibility.Collapsed;
-                IsDiscountsViewVisible = Visibility.Collapsed;
-                IsPromotionsViewVisible = Visibility.Collapsed;
-                IsSettingsViewVisible = Visibility.Collapsed;
+            {                
+                CurrentUserControl = _services.GetRequiredService<ScheduledOrdersView>();
+               
             }
             else
             {
@@ -1100,12 +1031,7 @@ namespace ChoziShopForWindows.ViewModels
             CurrentTime = DateTime.Now.ToString("dddd, MMMMM dd yyyy HH:mm:ss");
         }
 
-        // INotifyPropertyChanged implementation
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        
 
         private bool MerchantAccountExists()
         {
@@ -1181,5 +1107,47 @@ namespace ChoziShopForWindows.ViewModels
                 barcodeGenerator.ActivateMerchantSession(sessionResponse);
             }
         }
+
+        private void UpdateConnectivityStatus(ConnectivityStatus status)
+        {
+            Application current = Application.Current;
+            if (current != null)
+            {
+                current.Dispatcher.Invoke(() =>
+                {
+                    IsInternetConnected = status.IsInternetConnected;
+                    IsXmppConnected = status.IsXmppConnected;
+
+                });
+            }
+            ConnectivityStatus = status;
+            if (IsInternetConnected)
+                Debug.WriteLine("Internet is connected");
+            else
+                Debug.WriteLine($"Internet connected: {IsInternetConnected}");
+
+            if (IsXmppConnected)
+                Debug.WriteLine("Xmpp is connected. Can now send messages");
+        }
+
+
+
+        // INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+                return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
+
+
     }
 }

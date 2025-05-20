@@ -70,4 +70,7 @@
     <system:String x:Key="InvitationCodeHeader">Provide the invitation code sent to your phone to activate your ChoziShop account.</system:String>
     <system:String x:Key="CodePlaceHolder">Enter verification code</system:String>
     <system:String x:Key="VerifyKeeperHeader">Verify Keeper Account</system:String>
+    <system:String x:Key="CashCheckoutHeader">Cash</system:String>
+    <system:String x:Key="MobileMoneyCheckoutHeader">AirtelPay</system:String>
+    <system:String x:Key="PaymentModeHeader">Choose Preferred Payment Mode</system:String>
 </ResourceDictionary>

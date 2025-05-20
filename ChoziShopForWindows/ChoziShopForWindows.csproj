@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <None Remove="Resources\Images\add_new_shop.png" />
+    <None Remove="Resources\Images\add_shop_icon.png" />
     <None Remove="Resources\Images\arrow_up_left_icon.png" />
     <None Remove="Resources\Images\arrow_up_right_icon.png" />
     <None Remove="Resources\Images\card_payment_icon.png" />
@@ -18,17 +19,26 @@
     <None Remove="Resources\Images\checkout_shoppingcart_icon.png" />
     <None Remove="Resources\Images\choziicon.ico" />
     <None Remove="Resources\Images\chozi_icon_black.png" />
+    <None Remove="Resources\Images\cloud_connected_black_icon.png" />
+    <None Remove="Resources\Images\cloud_connected_icon.png" />
+    <None Remove="Resources\Images\cloud_download_icon.png" />
+    <None Remove="Resources\Images\cloud_not_connected_icon.png" />
+    <None Remove="Resources\Images\connected_green_icon.png" />
+    <None Remove="Resources\Images\delete_icon.png" />
     <None Remove="Resources\Images\discount_icon.png" />
     <None Remove="Resources\Images\end_of_month_icon.png" />
     <None Remove="Resources\Images\end_week_icon.png" />
+    <None Remove="Resources\Images\green_plus_icon.png" />
     <None Remove="Resources\Images\gt_logo_black.png" />
     <None Remove="Resources\Images\gt_logo_white.png" />
     <None Remove="Resources\Images\home_black.png" />
     <None Remove="Resources\Images\home_circled.png" />
     <None Remove="Resources\Images\inventory_down.png" />
+    <None Remove="Resources\Images\inventory_list_icon.png" />
     <None Remove="Resources\Images\inventory_tracker_icon.png" />
     <None Remove="Resources\Images\keepers_icon.png" />
     <None Remove="Resources\Images\orders_icon.png" />
+    <None Remove="Resources\Images\pause_icon.png" />
     <None Remove="Resources\Images\payments_icon.png" />
     <None Remove="Resources\Images\pay_later_icon.png" />
     <None Remove="Resources\Images\pending_check_icon.png" />
@@ -36,13 +46,18 @@
     <None Remove="Resources\Images\scheduled_order.png" />
     <None Remove="Resources\Images\settings_icon.png" />
     <None Remove="Resources\Images\shopping_basket.png" />
+    <None Remove="Resources\Images\shopping_store_icon.png" />
+    <None Remove="Resources\Images\shopping_trolley_icon.png" />
     <None Remove="Resources\Images\shops_icon.png" />
+    <None Remove="Resources\Images\shop_keepers_icon.png" />
+    <None Remove="Resources\Images\shop_list_icon.png" />
     <None Remove="Resources\Images\success_icon.png" />
     <None Remove="Resources\Images\today_icon.png" />
     <None Remove="Resources\Images\top_left_icon.png" />
     <None Remove="Resources\Images\top_right_icon.png" />
     <None Remove="Resources\Images\user_active_icon.png" />
     <None Remove="Resources\Images\user_unknown_icon.png" />
+    <None Remove="Resources\Images\visa_card_payment_icon.png" />
     <None Remove="Resources\Images\warning_icon.png" />
   </ItemGroup>
 
@@ -55,6 +70,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="HandyControl" Version="3.5.1" />
+    <PackageReference Include="libphonenumber-csharp" Version="9.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
       <PrivateAssets>all</PrivateAssets>
@@ -62,6 +78,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.3" />
@@ -71,30 +88,45 @@
   </ItemGroup>
 
   <ItemGroup>
+	  
     <Reference Include="ChoziShop.Data">
       <HintPath>..\..\ChoziShop.Data\ChoziShop.Data\obj\Debug\net8.0\ChoziShop.Data.dll</HintPath>
     </Reference>
+    <Reference Include="ChoziShopSharedConnectivity">
+      <HintPath>..\..\ChoziShopSharedConnectivity\ChoziShopSharedConnectivity\obj\Debug\net8.0\ChoziShopSharedConnectivity.dll</HintPath>
+    </Reference>
   </ItemGroup>
+
 
   <ItemGroup>
     <Resource Include="Resources\Images\add_new_shop.png" />
+    <Resource Include="Resources\Images\add_shop_icon.png" />
     <Resource Include="Resources\Images\arrow_up_left_icon.png" />
     <Resource Include="Resources\Images\arrow_up_right_icon.png" />
     <Resource Include="Resources\Images\card_payment_icon.png" />
     <Resource Include="Resources\Images\cart_pos.png" />
     <Resource Include="Resources\Images\checkout_shoppingcart_icon.png" />
     <Resource Include="Resources\Images\choziicon.ico" />
+    <Resource Include="Resources\Images\cloud_connected_black_icon.png" />
+    <Resource Include="Resources\Images\cloud_connected_icon.png" />
+    <Resource Include="Resources\Images\cloud_download_icon.png" />
+    <Resource Include="Resources\Images\cloud_not_connected_icon.png" />
+    <Resource Include="Resources\Images\connected_green_icon.png" />
+    <Resource Include="Resources\Images\delete_icon.png" />
     <Resource Include="Resources\Images\discount_icon.png" />
     <Resource Include="Resources\Images\end_of_month_icon.png" />
     <Resource Include="Resources\Images\end_week_icon.png" />
+    <Resource Include="Resources\Images\green_plus_icon.png" />
     <Resource Include="Resources\Images\gt_logo_black.png" />
     <Resource Include="Resources\Images\gt_logo_white.png" />
     <Resource Include="Resources\Images\home_black.png" />
     <Resource Include="Resources\Images\home_circled.png" />
     <Resource Include="Resources\Images\inventory_down.png" />
+    <Resource Include="Resources\Images\inventory_list_icon.png" />
     <Resource Include="Resources\Images\inventory_tracker_icon.png" />
     <Resource Include="Resources\Images\keepers_icon.png" />
     <Resource Include="Resources\Images\orders_icon.png" />
+    <Resource Include="Resources\Images\pause_icon.png" />
     <Resource Include="Resources\Images\payments_icon.png" />
     <Resource Include="Resources\Images\pay_later_icon.png" />
     <Resource Include="Resources\Images\pending_check_icon.png" />
@@ -102,14 +134,20 @@
     <Resource Include="Resources\Images\scheduled_order.png" />
     <Resource Include="Resources\Images\settings_icon.png" />
     <Resource Include="Resources\Images\shopping_basket.png" />
+    <Resource Include="Resources\Images\shopping_store_icon.png" />
+    <Resource Include="Resources\Images\shopping_trolley_icon.png" />
     <Resource Include="Resources\Images\shops_icon.png" />
+    <Resource Include="Resources\Images\shop_keepers_icon.png" />
+    <Resource Include="Resources\Images\shop_list_icon.png" />
     <Resource Include="Resources\Images\success_icon.png" />
     <Resource Include="Resources\Images\today_icon.png" />
     <Resource Include="Resources\Images\top_left_icon.png" />
     <Resource Include="Resources\Images\top_right_icon.png" />
     <Resource Include="Resources\Images\user_active_icon.png" />
     <Resource Include="Resources\Images\user_unknown_icon.png" />
+    <Resource Include="Resources\Images\visa_card_payment_icon.png" />
     <Resource Include="Resources\Images\warning_icon.png" />
   </ItemGroup>
+
 
 </Project>

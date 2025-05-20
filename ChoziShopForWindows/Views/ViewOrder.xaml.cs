@@ -15,17 +15,12 @@ using System.Windows.Shapes;
 
 namespace ChoziShopForWindows.Views
 {
-    /// <summary>
-    /// Interaction logic for EasyPos.xaml
-    /// </summary>
-    public partial class EasyPosView : UserControl
+    
+    public partial class ViewOrder : UserControl
     {
-        public EasyPosView()
+        public ViewOrder()
         {
             InitializeComponent();
-
         }
-
-
     }
 }

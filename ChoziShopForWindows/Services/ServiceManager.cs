@@ -58,10 +58,20 @@ namespace ChoziShopForWindows.Services
             process.WaitForExit();
         }
 
-        private static string GetServicePath()
+        public static string GetServicePath()
         {
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            return Path.Combine(Path.GetDirectoryName(assembly), "ChoziShopWorkerService.exe");
+            var baseDir = AppContext.BaseDirectory;
+            var serviceDir = Path.Combine(baseDir, "Messenger");
+            var serviceExePath = Path.Combine(serviceDir, "ChoziShopWorkerService.exe");
+
+            if (!File.Exists(serviceExePath))
+            {
+                throw new FileNotFoundException(
+                    $"Worker service executable not found at: {serviceExePath}\n" +
+                    $"Installation directory: {baseDir}\n" +
+                    $"Service directory: {serviceDir}");
+            }
+            return serviceExePath;
         }
     }
 }

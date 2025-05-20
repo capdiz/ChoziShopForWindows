@@ -3,4 +3,6 @@
                     xmlns:local="clr-namespace:ChoziShopForWindows.Converters">
     <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     <local:BoolToImageConverter x:Key="BoolToImageConverter" />
+    <local:UgxCurrencyConverter x:Key="UgxCurrencyConverter" />
+    <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
 </ResourceDictionary>
