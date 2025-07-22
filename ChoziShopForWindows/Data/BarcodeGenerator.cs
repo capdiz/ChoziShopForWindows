@@ -24,19 +24,23 @@ using System.Windows.Media;
 using Newtonsoft.Json;
 using System.Runtime.CompilerServices;
 using ChoziShopForWindows.MerchantsApi;
+using ChoziShopForWindows.ViewModels;
 
 namespace ChoziShopForWindows.Data
 {
     class BarcodeGenerator
     {
         public static readonly string AUTHENTICATION_URL = $"{HttpService.BASE_URL}/windows_accounts";
-        public static readonly string MERCHANT_AUTHORIZATION_URI = $"windows_sessions/unknown/validate_session?device_token=";        
+        public static readonly string MERCHANT_AUTHORIZATION_URI = $"windows_sessions/unknown/validate_session?device_token=";
         private string _deviceToken;
         private string _loginToken;
         private string _sessionAuthToken;
 
         private long activeSessionId;
         private bool _isMerchantSessionActive;
+        private bool isAuthorizationCompleted;
+
+        private MainWindowViewModel _mainWindowViewModel;
 
         private BaseApi _baseApi;
 
@@ -46,11 +50,15 @@ namespace ChoziShopForWindows.Data
         public EventHandler<MerchantResponse> MerchantResponseHandler;
         public EventHandler<WindowsSessionResponse> WindowsSessionResponseHandler;
 
-        public BarcodeGenerator()
+        public BarcodeGenerator(MainWindowViewModel mainWindowViewModel)
         {
             _pollingTimer = new Timer(2000);
             _pollingTimer.Elapsed += PollForAuthentication;
+            _mainWindowViewModel = mainWindowViewModel;
+            _mainWindowViewModel.InternetStatusHandler += OnInternetConnectionChanged;
         }
+
+
 
         public BarcodeGenerator(BaseApi baseApi)
         {
@@ -59,7 +67,13 @@ namespace ChoziShopForWindows.Data
             _authorizationTimer.Elapsed += PollForAuthorization;
         }
 
-       public void SetIsMerchantSessionActive(bool isActive)
+        public void SetMainWindowViewModel(MainWindowViewModel mainWindowViewModel)
+        {
+            _mainWindowViewModel = mainWindowViewModel;
+            _mainWindowViewModel.InternetStatusHandler += OnInternetConnectionChanged;
+        }
+
+        public void SetIsMerchantSessionActive(bool isActive)
         {
             _isMerchantSessionActive = isActive;
         }
@@ -72,6 +86,16 @@ namespace ChoziShopForWindows.Data
         public void SetSessionAuthToken(string sessionAuthToken)
         {
             _sessionAuthToken = sessionAuthToken;
+        }
+
+        public void StopAuthorizationTimer()
+        {
+            if (_authorizationTimer != null && _authorizationTimer.Enabled)
+            {
+                Debug.WriteLine("Stopping authorization timer");
+                _authorizationTimer.Stop();
+                _authorizationTimer.Elapsed -= PollForAuthorization;
+            }
         }
 
         public BitmapSource GenerateLoginBarcode()
@@ -106,7 +130,7 @@ namespace ChoziShopForWindows.Data
             var bitmap = writer.Write(qrcodePayload);
 
             // let us load our logo image
-            var logo = LoadBitmapFromFile();            
+            var logo = LoadBitmapFromFile();
             _authorizationTimer.Start();
 
             if (logo == null) return BitmapToImageSource(bitmap);
@@ -223,23 +247,37 @@ namespace ChoziShopForWindows.Data
             {
                 var isAuthorized = await IsAuthorized();
                 Debug.WriteLine("Polling for authorization: Authorization status: " + isAuthorized);
-                Application.Current.Dispatcher.Invoke(() =>
+                Application application = Application.Current;
+                if (application != null)
                 {
-                    if (isAuthorized)
+                    try
                     {
-                        Status = "Authorized";
-                        _authorizationTimer.Stop();
-                        //QrImage.Source = null;
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            if (isAuthorized)
+                            {
+                                Status = "Authorized";
+                                _authorizationTimer.Stop();
+                                isAuthorizationCompleted = true;
+                                //QrImage.Source = null;
+                            }
+                        });
                     }
-                });
+                    catch 
+                    {
+
+                    }
+                }
             }
             else
             {
                 var response = await ConnectToSession();
+                Debug.WriteLine("Polling for session authorization: Session status: " + response?.Status);
                 if (response != null)
                 {
                     Debug.WriteLine("Authorization successfully completed!");
                     _authorizationTimer.Stop();
+                    isAuthorizationCompleted = true;
                     WindowsSessionResponseHandler?.Invoke(this, response);
                 }
             }
@@ -280,11 +318,11 @@ namespace ChoziShopForWindows.Data
         private async Task<bool> IsAuthorized()
         {
             var client = new HttpClient();
-            var response = await _baseApi.ValidateWindowsSession(_loginToken, MERCHANT_AUTHORIZATION_URI);
+            var response = await _baseApi.ValidateWindowsSession(_loginToken);
             if (response != null)
             {
                 Debug.WriteLine("WindowsSession found with status: " + response.Status);
-                response.Status = "pending";
+
                 WindowsSessionResponseHandler?.Invoke(this, response);
                 return true;
             }
@@ -293,7 +331,7 @@ namespace ChoziShopForWindows.Data
         }
 
         private async Task<WindowsSessionResponse> ConnectToSession()
-        {                        
+        {
             return await _baseApi.RestartMerchantSession(_sessionAuthToken);
         }
 
@@ -311,6 +349,28 @@ namespace ChoziShopForWindows.Data
             {
                 Debug.WriteLine("WindowsSession not found");
 
+            }
+        }
+
+        private void OnInternetConnectionChanged(object? sender, bool isConnected)
+        {
+            if (_authorizationTimer != null)
+            {
+                bool isAuthorizationTimerRunning = _authorizationTimer.Enabled;
+                if (!isConnected)
+                {
+                    // stop polling if authorization timer is running and no internet detected
+                    if (isAuthorizationTimerRunning)
+                    {
+                        Debug.WriteLine("No internet connection detected. Stop unneccessary polling");
+                        _authorizationTimer.Stop();
+                    }
+                } // only start 
+                else if (!isAuthorizationTimerRunning && !isAuthorizationCompleted)
+                {
+                    Debug.WriteLine("Start polling for authorization");
+                    _authorizationTimer.Start();
+                }
             }
         }
     }

@@ -55,11 +55,15 @@ namespace ChoziShopForWindows.Services
                             var json = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                             var status = JsonSerializer.Deserialize<ConnectivityStatus>(json)!;
                             // Don't update UI immediately, Queue the status change
-                            Application.Current.Dispatcher.Invoke(() =>
+                            var current = Application.Current;
+                            if (current != null)
                             {
-                                Debug.WriteLine($"Status changed: {status}");
-                                StatusChanged?.Invoke(status);
-                            });
+                                current.Dispatcher.Invoke(() =>
+                                {
+                                    Debug.WriteLine($"Status changed: {status}");
+                                    StatusChanged?.Invoke(status);
+                                });
+                            }
                         }
 
                     }

@@ -5,16 +5,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ChoziShopForWindows.Views"
              xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:commands="clr-namespace:ChoziShopForWindows.Commands"
              xmlns:vm="clr-namespace:ChoziShopForWindows.ViewModels"
              Background="{DynamicResource RegionBrush}"
              mc:Ignorable="d">
 
   
     <hc:TransitioningContentControl>
-        <ScrollViewer>
-            <StackPanel Margin="10">
-                <UniformGrid Rows="2" Columns="3" Margin="5" >
-                    <GroupBox Header="{DynamicResource SalesHeader}" Margin="10" Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}" FontSize="22" FontWeight="Heavy" FontFamily="Dubai" Style="{StaticResource GroupBoxTab}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical" Margin="10">
+                <UniformGrid Rows="1" Columns="3" Margin="5">
+                    <GroupBox x:Name="SalesGroupBox" Header="{Binding LoggedInUserAccountType, 
+                        Converter={StaticResource SalesGroupHeaderConverter}}" Margin="10" 
+                              Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}" FontSize="22" FontWeight="Heavy" 
+                              FontFamily="Dubai" Style="{StaticResource GroupBoxTab}">
                         <Border Background="{DynamicResource DefaultBrush}" CornerRadius="4" BorderThickness="1" 
                             BorderBrush="{DynamicResource SalesGroupBoxBrush}" MinHeight="100">
                             <Grid>
@@ -26,24 +30,27 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <hc:Badge Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"  BadgeMargin="0,-5,-15,0" 
-                                          Text="{Binding TotalSalesAmountByDay, Mode=OneWay}" Style="{DynamicResource BadgeInfo}">
-                                    <Button Content="Today's sales" Command="{Binding UpdateSalesAmountCommand}" Foreground="#00695C" Margin="0,0,50,0" />
+                                <hc:Badge Status="Text" Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"
+                                          Text="{Binding TotalDailySalesAmount, Converter={StaticResource UgxCurrencyConverter}}" Style="{DynamicResource BadgeInfo}">
+                                    <Button Content="Today's sales" Command="{Binding UpdateSalesAmountCommand}" Foreground="#00695C" Margin="0,10,0,0" />
                                 </hc:Badge>
                                 <hc:SideMenu Grid.Row="1"  Margin="5">
-                                    
-                                    <hc:SideMenuItem Header="{DynamicResource TodayHeader}" FontSize="15">
+                                    <hc:SideMenuItem Header="{DynamicResource TodayHeader}" FontSize="15"                                                     
+                                                     Command="{Binding ShowTodaysSalesCommand}">
                                         <hc:SideMenuItem.Icon>
                                             <Image Source="/Resources/Images/today_icon.png" />
                                         </hc:SideMenuItem.Icon>
-
                                     </hc:SideMenuItem>
-                                    <hc:SideMenuItem Header="{DynamicResource WeekHeader}" FontSize="15" >
+                                    <hc:SideMenuItem Header="{DynamicResource WeekHeader}" FontSize="15"                                                      
+                                                     Command="{Binding ShowThisWeeksSalesCommand}">
                                         <hc:SideMenuItem.Icon>
                                             <Image Source="/Resources/Images/end_week_icon.png" />
                                         </hc:SideMenuItem.Icon>
                                     </hc:SideMenuItem>
-                                    <hc:SideMenuItem Header="{DynamicResource MonthHeader}" FontSize="15">
+                                    <hc:SideMenuItem Header="{DynamicResource MonthHeader}" FontSize="15"
+                                                     Visibility="{Binding LoggedInUserAccountType, 
+                                        Converter={StaticResource IntToVisibilityConverter}, ConverterParameter=OneIsVisible}"
+                                                     Command="{Binding ShowThisMonthsSalesCommand}">
                                         <hc:SideMenuItem.Icon>
                                             <Image Source="/Resources/Images/end_of_month_icon.png" />
                                         </hc:SideMenuItem.Icon>
@@ -54,7 +61,10 @@
                             </Grid>
                         </Border>
                     </GroupBox>
-                    <GroupBox Header="{DynamicResource OrdersHeader}" Margin="10" Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}" FontSize="20" FontWeight="Heavy" FontFamily="Dubai" Style="{StaticResource GroupBoxTab}">
+                  
+                    <GroupBox x:Name="OrdersGroupBox" Header="{Binding LoggedInUserAccountType, 
+                        Converter={StaticResource OrdersGroupBoxHeaderConverter}}" Margin="10" Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}"
+                              FontSize="20" FontWeight="Heavy" FontFamily="Dubai" Style="{StaticResource GroupBoxTab}">
                         <Border Background="{DynamicResource DefaultBrush}" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource SalesGroupBoxBrush}" MinHeight="100">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -65,35 +75,36 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <hc:Badge Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"  BadgeMargin="0,-5,-15,0" Value="{Binding CustomerOrdersCount}"
-                                          Style="{DynamicResource BadgeSuccess}">
+                                <hc:Badge Status="Text" Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"
+                                          Value="{Binding ClosedOrdersCount}" Style="{DynamicResource BadgeSuccess}">
                                     <Button Content="Today's closed orders" Foreground="#00695C" Margin="0,0,5,0" />
                                 </hc:Badge>
                                 <hc:SideMenu Grid.Row="1"  Margin="5">
-                                    
-                                    <hc:SideMenuItem Header="{DynamicResource ClosedOrdersHeader}" FontSize="15">
+
+                                    <hc:SideMenuItem Header="{DynamicResource ClosedOrdersHeader}" FontSize="15"
+                                                     Command="{Binding ShowClosedOrdersCommand}">
                                         <hc:SideMenuItem.Icon>
                                             <Image Source="/Resources/Images/success_icon.png" />
                                         </hc:SideMenuItem.Icon>
 
                                     </hc:SideMenuItem>
-                                    <hc:SideMenuItem Header="{DynamicResource PendingOrdersHeader}" FontSize="15" >
+                                    <hc:SideMenuItem Header="{DynamicResource PendingOrdersHeader}" FontSize="15" 
+                                                     Command="{Binding ShowHeldOrdersCommand}">
                                         <hc:SideMenuItem.Icon>
                                             <Image Source="/Resources/Images/pending_check_icon.png" />
                                         </hc:SideMenuItem.Icon>
                                     </hc:SideMenuItem>
-                                    <hc:SideMenuItem Header="{DynamicResource PaymentMethodsHeader}" FontSize="15">
+                                    <hc:SideMenuItem Header="{DynamicResource PaymentMethodsHeader}" FontSize="15" 
+                                                     Command="{Binding ShowPaymentsCommand}">
                                         <hc:SideMenuItem.Icon>
                                             <Image Source="/Resources/Images/card_payment_icon.png" />
                                         </hc:SideMenuItem.Icon>
                                     </hc:SideMenuItem>
                                 </hc:SideMenu>
-
-
                             </Grid>
                         </Border>
                     </GroupBox>
-                    <GroupBox Header="{DynamicResource InventoryHeader}" Margin="10" Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}" FontSize="20" FontWeight="Heavy" FontFamily="Dubai" Style="{StaticResource GroupBoxTab}">
+                    <GroupBox x:Name="InventoryGroupBox" Header="{DynamicResource InventoryHeader}" Margin="10" Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}" FontSize="20" FontWeight="Heavy" FontFamily="Dubai" Style="{StaticResource GroupBoxTab}">
                         <Border Background="{DynamicResource DefaultBrush}" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource SalesGroupBoxBrush}" MinHeight="100">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -105,37 +116,444 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <hc:Badge Height="30" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="13"  BadgeMargin="0,-5,-15,0"
-                                      Text="Kakira Sugar 1/2" Style="{DynamicResource BadgePrimary}">
+                                      Text="{Binding TopSellingItemOfTheDay}" Style="{DynamicResource BadgePrimary}">
                                 </hc:Badge>
 
                                 <hc:SideMenu Grid.Row="1"  Margin="5">
-                                    
-
-                                    <hc:SideMenuItem Header="{DynamicResource TopProductHeader}" FontSize="15">
+                                    <hc:SideMenuItem Command="{Binding ShowTopSellingProductsCommand}" 
+                                                     Header="{DynamicResource TopProductHeader}" FontSize="15"
+                                                     Visibility="{Binding LoggedInUserAccountType, Converter={StaticResource IntToVisibilityConverter},
+                                        ConverterParameter=OneIsVisible}">
                                         <hc:SideMenuItem.Icon>
                                             <Image Source="/Resources/Images/arrow_up_left_icon.png" />
                                         </hc:SideMenuItem.Icon>
                                     </hc:SideMenuItem>
 
-
-                                    <hc:SideMenuItem Header="{DynamicResource TopCategoryHeader}" FontSize="15" >
+                                    <hc:SideMenuItem Command="{Binding ShowTopCategoriesCommand}" 
+                                                     Header="{DynamicResource TopCategoryHeader}" FontSize="15"
+                                                     Visibility="{Binding LoggedInUserAccountType, Converter={StaticResource IntToVisibilityConverter},
+                                        ConverterParameter=OneIsVisible}">
                                         <hc:SideMenuItem.Icon >
                                             <Image Source="/Resources/Images/arrow_up_right_icon.png" />
                                         </hc:SideMenuItem.Icon>
                                     </hc:SideMenuItem>
-                                    <hc:SideMenuItem Header="{DynamicResource InventoryTrackerHeader}" FontSize="15">
+                                    <hc:SideMenuItem Command="{Binding ShowInventoryTrackerCommand}" 
+                                                     Header="{DynamicResource InventoryTrackerHeader}" FontSize="15">
                                         <hc:SideMenuItem.Icon>
                                             <Image Source="/Resources/Images/inventory_tracker_icon.png" />
                                         </hc:SideMenuItem.Icon>
                                     </hc:SideMenuItem>
                                 </hc:SideMenu>
-
-
                             </Grid>
                         </Border>
                     </GroupBox>
-
                 </UniformGrid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,0,0" Background="{DynamicResource DefaultBrush}">
+                    <Grid Margin="20" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="{Binding SelectedActionHeader}" Foreground="{DynamicResource BlueGray900Brush}" FontSize="16" FontWeight="DemiBold"
+                               FontFamily="Arial" TextAlignment="Left"/>
+                        <hc:Divider Background="{DynamicResource Cyan800Brush}" Grid.Row="1" />
+                        <UniformGrid Grid.Row="2" Rows="1" Columns="3" Visibility="{Binding IsOrdersDataGridVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="/Resources/Images/cash_payment_icon.png" Width="48" Height="48" Grid.Column="0" />
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5" HorizontalAlignment="Left">
+                                    <TextBlock Text="Total Cash Sales" FontSize="16" Foreground="{DynamicResource Cyan800Brush}" FontFamily="Arial" />
+                                    <TextBlock Text="{Binding TotalCashSalesAmount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource UgxCurrencyConverter}}"
+                                           FontSize="15" Foreground="{DynamicResource BlueGray500Brush}" FontFamily="Arial" FontWeight="SemiBold" Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid HorizontalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="/Resources/Images/mobile payment_icon.png" Width="48" Height="48" Grid.Column="0" />
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5" HorizontalAlignment="Center">
+                                    <TextBlock Text="Total Mobile Money Sales" FontSize="16" Foreground="{DynamicResource Cyan800Brush}" FontFamily="Arial" />
+                                    <TextBlock Text="{Binding TotalMobileMoneySalesAmount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource UgxCurrencyConverter}}"
+                   FontSize="15" Foreground="{DynamicResource BlueGray500Brush}" FontFamily="Arial" FontWeight="SemiBold" Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid HorizontalAlignment="Right">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="/Resources/Images/sales_pie_icon.png" Width="48" Height="48" Grid.Column="0" />
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5" HorizontalAlignment="Right">
+                                    <TextBlock Text="Generate Payment Modes Chart" FontSize="16" Foreground="{DynamicResource Cyan800Brush}" FontFamily="Arial" />
+                                    <Button Content="Generate Chart" Command="{Binding ShowPaymentModesChartCommand}" Style="{DynamicResource ButtonDashedPrimary}"
+          FontFamily="Arial" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </Grid>
+                        </UniformGrid>
+
+                        <UniformGrid Grid.Row="2" Rows="1" Columns="3" Visibility="{Binding IsSalesDataGridVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="/Resources/Images/mobile_sales_icon.png" Width="48" Height="48" Grid.Column="0"/>
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5" HorizontalAlignment="Left">
+                                    <TextBlock Text="Total Sales" FontSize="16" Foreground="{DynamicResource Cyan800Brush}" FontFamily="Arial" />
+                                    <TextBlock Text="{Binding SelectedSalesAmount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, 
+                                    Converter={StaticResource UgxCurrencyConverter}}" FontSize="15" Foreground="{DynamicResource BlueGray500Brush}"
+                   FontFamily="Arial" FontWeight="SemiBold" Margin="0,5,0,0" />
+                                </StackPanel>
+                            </Grid>
+                            <Grid HorizontalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="/Resources/Images/bar_chart_icon.png" Width="48" Height="48" Grid.Column="0"/>
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5" HorizontalAlignment="Left">
+                                    <TextBlock Text="Generate Sales Chart" FontSize="16" Foreground="{DynamicResource Cyan800Brush}" FontFamily="Arial" />
+                                    <Button Content="Generate Chart" Command="{Binding GenerateChartCommand}" Style="{DynamicResource ButtonDashedPrimary}"
+                                        FontFamily="Arial" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Left"/>
+
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid HorizontalAlignment="Right">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="/Resources/Images/lightning_icon.png" Width="48" Height="48" Grid.Column="0" />
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5" HorizontalAlignment="Right">
+                                    <TextBlock Text="Top 3 selling items" FontSize="16" Foreground="{DynamicResource Teal800Brush}" FontFamily="Arial" 
+                            TextWrapping="WrapWithOverflow"/>
+                                    <TextBlock Text="{Binding TopSellingItems}" FontSize="15" Foreground="{DynamicResource Blue600Brush}" FontFamily="Times New Roman" 
+FontWeight="SemiBold" Margin="0,5,0,0" TextWrapping="WrapWithOverflow" />
+                                </StackPanel>
+                            </Grid>
+                        </UniformGrid>
+
+                        <UniformGrid Grid.Row="2" Rows="1" Columns="4" Visibility="{Binding IsInventoryTrackerDataGridVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="/Resources/Images/outofstock_icon.png" Width="48" Height="48" Grid.Column="0"/>
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5" HorizontalAlignment="Left">
+                                    <TextBlock Text="Out of Stock" FontSize="16" Foreground="{DynamicResource BlueGray900Brush}" FontFamily="Arial" />
+                                    <TextBlock Text="{Binding OutOfStockCount}" FontSize="15" Foreground="{DynamicResource BlueGray500Brush}"
+                   FontFamily="Arial" FontWeight="SemiBold" Margin="0,5,0,0" />
+                                    <Button Content="View Items" Command="{Binding StockActionCommand}" CommandParameter="OutOfStock" 
+                                        Style="{DynamicResource ButtonInfo.Small}" Foreground="White" HorizontalAlignment="Left" />
+                                </StackPanel>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="/Resources/Images/critical_warning_icon.png" Width="48" Height="48" Grid.Column="0"/>
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5" HorizontalAlignment="Left">
+                                    <TextBlock Text="Critical on Stock" FontSize="16" Foreground="{DynamicResource BlueGray900Brush}" FontFamily="Arial" />
+                                    <TextBlock Text="{Binding CriticalOnStockCount}" FontSize="15" Foreground="{DynamicResource BlueGray500Brush}" 
+                                           FontFamily="Arial" FontWeight="SemiBold" Margin="0,5,0,0" />
+                                    <Button Content="View Items" Command="{Binding StockActionCommand}" CommandParameter="Critical"
+                                        Style="{DynamicResource ButtonDanger.Small}" FontFamily="Arial" HorizontalAlignment="Left"/>
+
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="/Resources/Images/low_stock_icon.png" Width="48" Height="48" Grid.Column="0" />
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5">
+                                    <TextBlock Text="Low on Stock" FontSize="16" Foreground="{DynamicResource BlueGray900Brush}" FontFamily="Arial" 
+                            TextWrapping="WrapWithOverflow"/>
+                                    <TextBlock Text="{Binding LowOnStockCount}" FontSize="15" Foreground="{DynamicResource Blue600Brush}" FontFamily="Times New Roman" 
+FontWeight="SemiBold" Margin="0,5,0,0" TextWrapping="WrapWithOverflow" />
+                                    <Button Content="View Items" Command="{Binding StockActionCommand}" CommandParameter="Low" 
+                                        Style="{DynamicResource ButtonPrimary.Small}" FontFamily="Arial" HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="/Resources/Images/line_chart_icon.png" Width="48" Height="48" Grid.Column="0" />
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5">
+                                    <TextBlock Text="Stock Overview" FontSize="16" Foreground="{DynamicResource BlueGray900Brush}" FontFamily="Arial" 
+                            TextWrapping="WrapWithOverflow"/>
+                                    <TextBlock Text="0" FontSize="15" Foreground="{DynamicResource Blue600Brush}" FontFamily="Times New Roman" 
+FontWeight="SemiBold" Margin="0,5,0,0" TextWrapping="WrapWithOverflow" />
+                                    <Button Content="View Inventory Tracker" Command="" Style="{DynamicResource ButtonSuccess.Small}" FontFamily="Arial" HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </Grid>
+                        </UniformGrid>
+
+
+                        <DataGrid x:Name="SalesDataGrid" Grid.Row="3" ItemsSource="{Binding Sales, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HeadersVisibility="All" RowHeaderWidth="60" 
+                              Visibility="{Binding IsSalesDataGridVisible, Converter={StaticResource BoolToVisibilityConverter}}" 
+                              AutoGenerateColumns="False" Margin="0,10,0,10" Background="{DynamicResource Green50Brush}" SelectionMode="Single" SelectionUnit="FullRow">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn IsReadOnly="True" Width="80" CanUserResize="False" Binding="{Binding ItemId}" 
+  Header="Item ID." Foreground="Black" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding ItemName}" Header="Item Name" Foreground="SteelBlue" FontWeight="SemiBold" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding UnitPrice}" Header="Unit Price" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding UnitsSold}" Header="Units Sold" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding TotalSalesAmount, Converter={StaticResource UgxCurrencyConverter}}" Header="Total Amount" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding SalesTimeSpan}" HeaderStyle="{StaticResource DataGridColumnHeaderStyle.Small}" Header="Time Span"
+                                                Foreground="CornflowerBlue" FontWeight="Medium" FontFamily="Comic Sans MS"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <DataGrid x:Name="OrdersDataGrid" Grid.Row="3" ItemsSource="{Binding CustomerOrders, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HeadersVisibility="All" RowHeaderWidth="60" 
+                            Visibility="{Binding IsOrdersDataGridVisible, Converter={StaticResource BoolToVisibilityConverter}}" 
+                            AutoGenerateColumns="False" Margin="0,10,0,10" Background="{DynamicResource Green50Brush}" SelectionMode="Single" SelectionUnit="FullRow">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn IsReadOnly="True" Width="80" CanUserResize="False" Binding="{Binding Id}" 
+Header="Order ID." Foreground="Black" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding PreferredPaymentMode, Converter={StaticResource PaymentModeConverter}}" Header="Payment Mode" Foreground="SteelBlue" FontWeight="SemiBold" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding PaymentStatus, Converter={StaticResource PaymentStatusConverter}}" Header="Payment Status" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding OrderStatus, Converter={StaticResource OrderStatusConverter}}" Header="Order Status" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding TotalAmountCents, Converter={StaticResource UgxCurrencyConverter}}" Header="Total Amount" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding OrderProcessedByUserName}" 
+HeaderStyle="{StaticResource DataGridColumnHeaderStyle.Small}" Header="Processed by"
+                                              Foreground="CornflowerBlue" FontWeight="Medium" FontFamily="Comic Sans MS"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding OrderProductItems, Converter={StaticResource OrderItemsListConverter}}" Header="Item List" Foreground="SteelBlue"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <DataGrid x:Name="PendingOrdersDataGrid" Grid.Row="3" ItemsSource="{Binding PendingOrders, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HeadersVisibility="All" RowHeaderWidth="60" 
+                            Visibility="{Binding IsPendingOrdersDataGridVisible, Converter={StaticResource BoolToVisibilityConverter}}" 
+                            AutoGenerateColumns="False" Margin="0,10,0,10" Background="{DynamicResource Green50Brush}" SelectionMode="Single" SelectionUnit="FullRow">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn IsReadOnly="True" Width="80" CanUserResize="False" Binding="{Binding Id}" 
+Header="Order ID." Foreground="Black" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding PreferredPaymentMode, Converter={StaticResource PaymentModeConverter}}" Header="Payment Mode" Foreground="SteelBlue" FontWeight="SemiBold" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding PaymentStatus, Converter={StaticResource PaymentStatusConverter}}" Header="Payment Status" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding OrderStatus, Converter={StaticResource OrderStatusConverter}}" Header="Order Status" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding TotalAmountCents, Converter={StaticResource UgxCurrencyConverter}}" Header="Total Amount" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding OrderProcessedByUserName}" 
+HeaderStyle="{StaticResource DataGridColumnHeaderStyle.Small}" Header="Processed by"
+                                              Foreground="CornflowerBlue" FontWeight="Medium" FontFamily="Comic Sans MS"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding OrderProductItems, Converter={StaticResource OrderItemsListConverter}}" Header="Item List" Foreground="SteelBlue"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel Grid.Row="2" Orientation="Vertical" Visibility="{Binding LoggedInUserAccountType, 
+                            Converter={StaticResource IntToVisibilityConverter}, ConverterParameter=OneIsVisible}">
+                            <UniformGrid Rows="1" Columns="2" Visibility="{Binding IsTopSellingItemsDataGridVisible, 
+                            Converter={StaticResource BoolToVisibilityConverter}}">
+                                <hc:ComboBox MaxWidth="210" ItemsSource="{Binding DateRangeOptions}" SelectedIndex="0" SelectedItem="{Binding SelectedProductDateRange}"
+hc:InfoElement.Title="Select a timespan below" Text="Life" HorizontalAlignment="Left" Foreground="{DynamicResource BlueGray500Brush}">
+                                    <hc:ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding DisplayName}" FontSize="14" Foreground="{DynamicResource BlueGray800Brush}" />
+                                                <TextBlock Text="{Binding ProductDateRangeDisplay}" FontSize="14" Foreground="{DynamicResource BlueGray800Brush}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </hc:ComboBox.ItemTemplate>
+                                </hc:ComboBox>
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="{Binding SalesTypeHeader, Mode=TwoWay}" TextAlignment="Right" FontSize="17" FontWeight="SemiBold"
+                            FontFamily="Arial" Foreground="{DynamicResource Teal800Brush}" />
+                                    <TextBlock Text="{Binding TotalSalesAmountHeader}" TextAlignment="Right" FontSize="16" 
+Foreground="{DynamicResource TotalAmountHeaderBrush}" FontFamily="Arial" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding TotalSalesAmountValue, Converter={StaticResource UgxCurrencyConverter}}" 
+                                           TextAlignment="Right" FontSize="17" Foreground="{DynamicResource Blue600Brush}" 
+                                           FontFamily="Times New Roman" FontWeight="DemiBold" Margin="0,5,10,0"/>
+                                </StackPanel>
+                            </UniformGrid>
+
+
+                            <DataGrid x:Name="TopSellingItemsDataGrid" ItemsSource="{Binding TopSellingCategoryProducts}" HeadersVisibility="All" RowHeaderWidth="60"
+                              Visibility="{Binding IsTopSellingItemsDataGridVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                              AutoGenerateColumns="False" Margin="0,10,0,10" Background="{DynamicResource Green50Brush}" SelectionMode="Single" SelectionUnit="FullRow">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn IsReadOnly="True" Width="80" CanUserResize="False" Binding="{Binding ItemNo}" Header="Item No." Foreground="Black" />
+                                    <DataGridTextColumn IsReadOnly="True" Width="80" CanUserResize="False" Binding="{Binding OnlineCategoryProductId}"
+Header="Product Id" Foreground="Black" />
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding ProductName}" Header="Product Name" Foreground="SteelBlue" FontWeight="SemiBold" />
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding TotalSalesAmount, Converter={StaticResource UgxCurrencyConverter}}"
+                                                Header="Total Sales Amount"  Foreground="SteelBlue" FontWeight="SemiBold"/>
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding TotalSalesCount}" Header="Total Sales Count" Foreground="SteelBlue"/>
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding LastSaleDate}" HeaderStyle="{StaticResource DataGridColumnHeaderStyle.Small}" Header="Last Sale Date"
+                                              Foreground="CornflowerBlue" FontWeight="Medium" FontFamily="Comic Sans MS"/>
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding RecencyWeightedScore}" Header="Score" Foreground="SteelBlue"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                        
+
+                        <UniformGrid Grid.Row="2" Rows="1" Columns="2" Visibility="{Binding IsTopSellingCategoriesDataGridVisible, 
+                            Converter={StaticResource BoolToVisibilityConverter}}">
+                            <hc:ComboBox Grid.Row="2" MaxWidth="210" ItemsSource="{Binding DateRangeOptions}" SelectedIndex="0"
+                                         SelectedItem="{Binding SelectedDateRange}" hc:InfoElement.Title="Select a timespan below" 
+                                         HorizontalAlignment="Left" Foreground="{DynamicResource BlueGray500Brush}">
+                                <hc:ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DisplayName}" FontSize="14" Foreground="{DynamicResource BlueGray800Brush}" />
+                                            <TextBlock Text="{Binding DateRangeDisplay}" FontSize="14" Foreground="{DynamicResource BlueGray800Brush}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </hc:ComboBox.ItemTemplate>
+                            </hc:ComboBox>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{Binding SalesTypeHeader, Mode=TwoWay}" TextAlignment="Right" FontSize="17" FontWeight="SemiBold"
+                                           FontFamily="Arial" Foreground="{DynamicResource Teal800Brush}" />
+                                <TextBlock Text="{Binding TotalSalesAmountHeader}" TextAlignment="Right" FontSize="16" 
+               Foreground="{DynamicResource TotalAmountHeaderBrush}" FontFamily="Arial" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding TotalSalesAmountValue, Converter={StaticResource UgxCurrencyConverter}}" 
+               TextAlignment="Right" FontSize="17" Foreground="{DynamicResource Blue600Brush}" 
+               FontFamily="Times New Roman" FontWeight="DemiBold" Margin="0,5,10,0"/>
+                            </StackPanel>
+                        </UniformGrid>
+
+                        <DataGrid x:Name="TopSellingCategoriesDataGrid" Grid.Row="3" ItemsSource="{Binding TopSellingCategories}" HeadersVisibility="All" RowHeaderWidth="60"
+                              Visibility="{Binding IsTopSellingCategoriesDataGridVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                              AutoGenerateColumns="False" Margin="0,10,0,10" Background="{DynamicResource Green50Brush}" SelectionMode="Single" SelectionUnit="FullRow">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn IsReadOnly="True" Width="80" CanUserResize="False" Binding="{Binding CategorySectionId}"
+Header="Catrgory Section Id" Foreground="Black" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding CategoryName}" Header="Category Name" Foreground="SteelBlue" FontWeight="SemiBold" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding TotalSalesAmount, Converter={StaticResource UgxCurrencyConverter}}" Header="Total Sales Amount" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding TotalSalesCount}" Header="Total Sales Count" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding LastSaleDate}" HeaderStyle="{StaticResource DataGridColumnHeaderStyle.Small}" Header="Last Sale Date"
+                                              Foreground="CornflowerBlue" FontWeight="Medium" FontFamily="Comic Sans MS"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding RecencyWeightedScore}" Header="Score" Foreground="SteelBlue"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <DataGrid x:Name="InventoryDataGrid" Grid.Row="3" ItemsSource="{Binding StockItems, Mode=TwoWay}" HeadersVisibility="All" RowHeaderWidth="60" MaxHeight="480"
+                              Visibility="{Binding IsInventoryTrackerDataGridVisible, Converter={StaticResource BoolToVisibilityConverter}}" SelectedItem="{Binding SelectedStockItem}"
+                              AutoGenerateColumns="False" Margin="0,10,0,10" Background="{DynamicResource Blue100Brush}" SelectionMode="Single" SelectionUnit="FullRow">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn CanUserResize="False">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Grid.Row="5" TextAlignment="Left" Margin="10,1,10,10" Grid.RowSpan="3">
+                                                <Hyperlink
+                                                    commands:HyperLinkCommands.Command="{Binding DataContext.EditProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    Foreground="{DynamicResource PrimaryBrush}" 
+                                                    FontSize="14"
+                                                    FontWeight="Medium"
+                                                    FontFamily="Arial" ><Run Text="Edit"/>
+                                                </Hyperlink>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding ItemNo}" HeaderStyle="{StaticResource DataGridColumnHeaderStyle.Small}" 
+                                                Header="Item No." Foreground="Black" FontWeight="SemiBold" />
+                                <DataGridTextColumn IsReadOnly="True" CanUserResize="False" Binding="{Binding Id}" Header="Product ID" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding ItemName}" Header="Product Name" Foreground="SteelBlue" FontWeight="SemiBold" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Quantity}" Header="Remaining Units" Foreground="SteelBlue"/>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Status}" Header="Status">
+                                    <DataGridTextColumn.CellStyle>
+                                        <Style TargetType="DataGridCell">
+                                            <!-- Default styling -->
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                            <Setter Property="Padding" Value="5"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Status}" Value="Empty">
+                                                    <Setter Property="Background" Value="#FFFFCDD2"/>
+                                                    <Setter Property="Foreground" Value="#FFB71C1C"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Status}" Value="Critical">
+                                                    <Setter Property="Background" Value="#FFFFF9C4"/>
+                                                    <Setter Property="Foreground" Value="#FFF57F17"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Status}" Value="Low">
+                                                    <Setter Property="Background" Value="{DynamicResource Lime300Brush}"/>
+                                                    <Setter Property="Foreground" Value="Black"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGridTextColumn.CellStyle>
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn CanUserResize="False">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Grid.Row="5" TextAlignment="Left" Margin="10,1,10,10" Grid.RowSpan="3">
+                                                <Hyperlink
+                                                    commands:HyperLinkCommands.Command="{Binding DataContext.RestockItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    Foreground="{DynamicResource InfoBrush}" 
+                                                    FontSize="14"
+                                                    FontWeight="Medium"
+                                                    FontFamily="Arial" ><Run Text="Restock"/>
+                                                </Hyperlink>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn CanUserResize="False"  >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Grid.Row="5" TextAlignment="Left" Margin="10,1,10,10" Grid.RowSpan="3"
+                                                       Visibility="{Binding DataContext.LoggedInUserAccountType,
+                                    RelativeSource={RelativeSource AncestorType=DataGrid},
+                                    Converter={StaticResource IntToVisibilityConverter}, ConverterParameter=OneIsVisible}">
+                                                <Hyperlink
+                                                    commands:HyperLinkCommands.Command="{Binding DataContext.DeleteProductCommand, 
+                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    Foreground="{DynamicResource DangerBrush}" 
+                                                    FontSize="14"
+                                                    FontWeight="Medium"
+                                                    FontFamily="Arial" ><Run Text="Discontinue product"/>
+                                                </Hyperlink>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn CanUserResize="False">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Grid.Row="5" TextAlignment="Left" Margin="10,1,10,10" Grid.RowSpan="3">
+                                                <Hyperlink
+                                                    commands:HyperLinkCommands.Command="{Binding DataContext.InventoryLogCommand, 
+                                                RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    Foreground="{DynamicResource DarkSuccessBrush}" 
+                                                    FontSize="14"
+                                                    FontWeight="Medium"
+                                                    FontFamily="Arial" ><Run Text="View log inventory history"/>
+                                                </Hyperlink>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </ScrollViewer>
             </StackPanel>
         </ScrollViewer>
     </hc:TransitioningContentControl>

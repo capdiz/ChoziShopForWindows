@@ -5,6 +5,8 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:local="clr-namespace:ChoziShopForWindows.Views"
         xmlns:vm="clr-namespace:ChoziShopForWindows.ViewModels"
+        xmlns:validations="clr-namespace:ChoziShopForWindows.Validations"
+        xmlns:extensions="clr-namespace:ChoziShopForWindows.Extensions"
         mc:Ignorable="d"             
         d:DesignHeight="680" d:DesignWidth="800"
         Background="{DynamicResource RegionBrush}">
@@ -16,7 +18,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Button Grid.Row="0" Width="22" Height="22" Command="hc:ControlCommands.Close" Style="{StaticResource ButtonIcon}" 
+                <Button Grid.Row="0" IsEnabled="{Binding IsControlEnabled}" Width="22" Height="22" Command="hc:ControlCommands.Close" Style="{StaticResource ButtonIcon}" 
                         Foreground="{DynamicResource PrimaryBrush}" hc:IconElement.Geometry="{StaticResource ErrorGeometry}" 
                         Padding="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5"/>
                 <TextBlock x:Name="AccountLoginHeader" Text="{DynamicResource UserLoginHeader}" TextAlignment="Center" FontFamily="Arial" FontSize="17" 
@@ -26,9 +28,18 @@
                         <TextBlock Text="{DynamicResource StoreKeeperLoginHeader}" TextAlignment="Center" FontFamily="Arial" 
                                    FontSize="14" FontWeight="DemiBold" Foreground="{DynamicResource InProgressColorBrush}" />
                         <hc:Divider Margin="10" Background="AliceBlue" />
-                        <hc:TextBox x:Name="TxbUserName" hc:InfoElement.Placeholder="{DynamicResource UserNameHeader}" MinHeight="40" Margin="10,0,10,0"/>
-                        <hc:TextBox x:Name="TxbPassword" hc:InfoElement.Placeholder="{DynamicResource PasswordHeader}" MinHeight="40" Margin="10,10,10,0"/>
-                        <Button Content="{DynamicResource LoginHeader}" FontSize="15" Foreground="White" Background="{DynamicResource DarkPrimaryBrush}" Margin="10"/>
+                        <hc:TextBox x:Name="TxbUserName" Text="{Binding KeeperEmail, UpdateSourceTrigger=PropertyChanged, 
+                            ValidatesOnNotifyDataErrors=True}" IsEnabled="{Binding IsControlEnabled}"
+                                    hc:InfoElement.Placeholder="{DynamicResource UserNameHeader}" MinHeight="40" Margin="10,0,10,0"/>
+                        <PasswordBox x:Name="TxbPassword" IsEnabled="{Binding IsControlEnabled}"
+                                       PasswordChar="*"
+                                     extensions:PasswordBoxAssistant.BindPassword="True"
+                                     extensions:PasswordBoxAssistant.BoundPassword="{Binding Password, Mode=TwoWay,
+                            UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                       hc:InfoElement.Placeholder="{DynamicResource PasswordHeader}" MinHeight="40" Margin="10,10,10,0"/>
+                        <Button Content="{DynamicResource LoginHeader}" Command="{Binding LoginKeeperCommand}"
+                                IsEnabled="{Binding IsControlEnabled}" FontSize="15" Foreground="White" 
+                                Background="{DynamicResource DarkPrimaryBrush}" Margin="10"/>
                         <TextBlock TextAlignment="Center"><Hyperlink NavigateUri="https://www.chozishop.com/" Foreground="{DynamicResource PrimaryBrush}" FontSize="13"
                                        FontFamily="Arial" FontWeight="ExtraLight"><Run Text="Forgot password?"/></Hyperlink></TextBlock>
                         <hc:Divider Margin="10" Background="{DynamicResource BlueGray500Brush}" />
@@ -37,10 +48,26 @@
            FontWeight="Medium" Foreground="{DynamicResource BlueGray500Brush}" TextWrapping="WrapWithOverflow" Margin="10" />
                         <hc:Divider Margin="5" Background="{DynamicResource BlueGray500Brush}" />
 
-                        <hc:TextBox x:Name="txtVerificationCode" hc:InfoElement.Placeholder="{DynamicResource CodePlaceHolder}" MinHeight="30" MinWidth="220"
-                                    HorizontalAlignment="Center" Margin="10" />
-                        <Button x:Name="btnVerifyCode" Content="{DynamicResource VerifyKeeperHeader}" FontFamily="Arial" Foreground="{DynamicResource GrayWhiteBrush}"
-                                 FontSize="15" FontWeight="Medium" Background="{DynamicResource DarkSuccessBrush}" Padding="5" />
+                        <hc:TextBox x:Name="txtVerificationCode" hc:InfoElement.Placeholder="{DynamicResource CodePlaceHolder}" 
+                                    MinHeight="30" MinWidth="220" IsEnabled="{Binding IsControlEnabled}"
+                                    HorizontalAlignment="Center" Margin="10">
+                            <TextBox.Text>
+                                <Binding Path="VerificationCode" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding.ValidationRules>
+                                        <validations:IntegerValidationRule AllowNegative="False" AllowEmpty="False" />
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </hc:TextBox>
+                        <hc:LoadingCircle Visibility="{Binding IsLoadingCircleVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                          Margin="5" Foreground="{DynamicResource Lime400Brush}" />
+                        <Button x:Name="btnVerifyCode" Command="{Binding VerifyKeeperCodeCommand}"
+                                Content="{DynamicResource VerifyKeeperHeader}" IsEnabled="{Binding IsControlEnabled}"
+                                FontFamily="Arial" Foreground="{DynamicResource GrayWhiteBrush}"
+                                FontSize="15" FontWeight="Medium" Background="{DynamicResource DarkSuccessBrush}" Padding="5" />
+                        <TextBlock Text="{Binding KeeperVerificationStatus}" TextAlignment="Center" TextWrapping="WrapWithOverflow"
+                                   Visibility="{Binding IsKeeperVerificationStatusVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                   Margin="10" Foreground="{Binding IsKeeperVerificationSuccessful, Converter={StaticResource BoolToColorConverter}}" FontSize="14" FontWeight="Medium" FontFamily="Arial" />
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0,0,10,-71">
                         <TextBlock Text="{DynamicResource MerchantAccountLoginHeader}" TextAlignment="Center" FontFamily="Arial"

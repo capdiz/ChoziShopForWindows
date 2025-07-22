@@ -3,6 +3,7 @@
 		<ComponentGroup Id="InstallationComponents" Directory="INSTALLFOLDER">
 			<Component Id="MainExecutable" Guid="*">
 				<File Id="ChoziShop" Source="..\ChoziShopForWindows\bin\Release\net8.0-windows\publish\win-x64\ChoziShopForWindows.exe" Name="ChoziShopForWindows.exe" KeyPath="yes" />
+				c:\users\capdi\source\repos\chozishopforwindows\chozishopforwindows\bin\release\net8.0-windows\publish\win-x64
 			</Component>
 
 			<Component Id="MainDll" Guid="06a31a77-433a-47ce-8b08-ad272b31a994">

@@ -1,6 +1,8 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Package Scope="perMachine" Name="ChoziShopForWindows" Manufacturer="Gershom Technology" Version="1.0.0.0" UpgradeCode="2f8660a0-1233-455e-88e0-762b338df559">
-    <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />	 
+  <Package Scope="perMachine" Name="ChoziShopForWindows" Manufacturer="Gershom Technology" Version="1.0.0.1" UpgradeCode="2f8660a0-1233-455e-88e0-762b338df559">
+	  <!--AllowSameVersionUpgrade treats a release with same version number as an upgrade-->
+    <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)"  AllowSameVersionUpgrades="yes"/>
+	  
 	  <!--equals to install="permachine" at package element but this element depricated -->
 	  <Property Id="MSIUSEREALADMINDETECTION" Value="1" />
 

@@ -6,16 +6,20 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\Images\add_new_shop.png" />
     <None Remove="Resources\Images\add_shop_icon.png" />
+    <None Remove="Resources\Images\airtel_logo.png" />
     <None Remove="Resources\Images\arrow_up_left_icon.png" />
     <None Remove="Resources\Images\arrow_up_right_icon.png" />
+    <None Remove="Resources\Images\bar_chart_icon.png" />
     <None Remove="Resources\Images\card_payment_icon.png" />
     <None Remove="Resources\Images\cart_pos.png" />
+    <None Remove="Resources\Images\cash_payment_icon.png" />
     <None Remove="Resources\Images\checkout_shoppingcart_icon.png" />
     <None Remove="Resources\Images\choziicon.ico" />
     <None Remove="Resources\Images\chozi_icon_black.png" />
@@ -24,8 +28,10 @@
     <None Remove="Resources\Images\cloud_download_icon.png" />
     <None Remove="Resources\Images\cloud_not_connected_icon.png" />
     <None Remove="Resources\Images\connected_green_icon.png" />
+    <None Remove="Resources\Images\critical_warning_icon.png" />
     <None Remove="Resources\Images\delete_icon.png" />
     <None Remove="Resources\Images\discount_icon.png" />
+    <None Remove="Resources\Images\dstv_logo.jpeg" />
     <None Remove="Resources\Images\end_of_month_icon.png" />
     <None Remove="Resources\Images\end_week_icon.png" />
     <None Remove="Resources\Images\green_plus_icon.png" />
@@ -36,13 +42,24 @@
     <None Remove="Resources\Images\inventory_down.png" />
     <None Remove="Resources\Images\inventory_list_icon.png" />
     <None Remove="Resources\Images\inventory_tracker_icon.png" />
+    <None Remove="Resources\Images\invoice_bill_icon.png" />
     <None Remove="Resources\Images\keepers_icon.png" />
+    <None Remove="Resources\Images\lightning_icon.png" />
+    <None Remove="Resources\Images\line_chart_icon.png" />
+    <None Remove="Resources\Images\low_stock_icon.png" />
+    <None Remove="Resources\Images\mobile payment_icon.png" />
+    <None Remove="Resources\Images\mobile_sales_icon.png" />
+    <None Remove="Resources\Images\momo_logo.png" />
+    <None Remove="Resources\Images\nwsc_logo.png" />
     <None Remove="Resources\Images\orders_icon.png" />
+    <None Remove="Resources\Images\outofstock_icon.png" />
     <None Remove="Resources\Images\pause_icon.png" />
     <None Remove="Resources\Images\payments_icon.png" />
     <None Remove="Resources\Images\pay_later_icon.png" />
     <None Remove="Resources\Images\pending_check_icon.png" />
     <None Remove="Resources\Images\promotion_icon.png" />
+    <None Remove="Resources\Images\reload_order_icon.png" />
+    <None Remove="Resources\Images\sales_pie_icon.png" />
     <None Remove="Resources\Images\scheduled_order.png" />
     <None Remove="Resources\Images\settings_icon.png" />
     <None Remove="Resources\Images\shopping_basket.png" />
@@ -52,9 +69,11 @@
     <None Remove="Resources\Images\shop_keepers_icon.png" />
     <None Remove="Resources\Images\shop_list_icon.png" />
     <None Remove="Resources\Images\success_icon.png" />
+    <None Remove="Resources\Images\sync_upload_icon.png" />
     <None Remove="Resources\Images\today_icon.png" />
     <None Remove="Resources\Images\top_left_icon.png" />
     <None Remove="Resources\Images\top_right_icon.png" />
+    <None Remove="Resources\Images\uedcl_logo.jpeg" />
     <None Remove="Resources\Images\user_active_icon.png" />
     <None Remove="Resources\Images\user_unknown_icon.png" />
     <None Remove="Resources\Images\visa_card_payment_icon.png" />
@@ -65,12 +84,29 @@
     <Content Include="Resources\Images\chozi_icon_black.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Images\dstv_logo.jpeg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\invoice_bill_icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\momo_logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\nwsc_logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\uedcl_logo.jpeg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="HandyControl" Version="3.5.1" />
+    <PackageReference Include="HandyControl.Lang.en" Version="3.5.1" />
     <PackageReference Include="libphonenumber-csharp" Version="9.0.5" />
+    <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
       <PrivateAssets>all</PrivateAssets>
@@ -101,17 +137,25 @@
   <ItemGroup>
     <Resource Include="Resources\Images\add_new_shop.png" />
     <Resource Include="Resources\Images\add_shop_icon.png" />
+    <Content Include="Resources\Images\airtel_logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Resources\Images\arrow_up_left_icon.png" />
     <Resource Include="Resources\Images\arrow_up_right_icon.png" />
+    <Resource Include="Resources\Images\bar_chart_icon.png" />
     <Resource Include="Resources\Images\card_payment_icon.png" />
     <Resource Include="Resources\Images\cart_pos.png" />
+    <Resource Include="Resources\Images\cash_payment_icon.png" />
     <Resource Include="Resources\Images\checkout_shoppingcart_icon.png" />
     <Resource Include="Resources\Images\choziicon.ico" />
     <Resource Include="Resources\Images\cloud_connected_black_icon.png" />
-    <Resource Include="Resources\Images\cloud_connected_icon.png" />
+    <Resource Include="Resources\Images\cloud_connected_icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\Images\cloud_download_icon.png" />
     <Resource Include="Resources\Images\cloud_not_connected_icon.png" />
     <Resource Include="Resources\Images\connected_green_icon.png" />
+    <Resource Include="Resources\Images\critical_warning_icon.png" />
     <Resource Include="Resources\Images\delete_icon.png" />
     <Resource Include="Resources\Images\discount_icon.png" />
     <Resource Include="Resources\Images\end_of_month_icon.png" />
@@ -125,12 +169,22 @@
     <Resource Include="Resources\Images\inventory_list_icon.png" />
     <Resource Include="Resources\Images\inventory_tracker_icon.png" />
     <Resource Include="Resources\Images\keepers_icon.png" />
+    <Resource Include="Resources\Images\lightning_icon.png" />
+    <Resource Include="Resources\Images\line_chart_icon.png" />
+    <Resource Include="Resources\Images\low_stock_icon.png" />
+    <Resource Include="Resources\Images\mobile payment_icon.png" />
+    <Resource Include="Resources\Images\mobile_sales_icon.png" />
     <Resource Include="Resources\Images\orders_icon.png" />
+    <Resource Include="Resources\Images\outofstock_icon.png" />
     <Resource Include="Resources\Images\pause_icon.png" />
     <Resource Include="Resources\Images\payments_icon.png" />
     <Resource Include="Resources\Images\pay_later_icon.png" />
     <Resource Include="Resources\Images\pending_check_icon.png" />
     <Resource Include="Resources\Images\promotion_icon.png" />
+    <Resource Include="Resources\Images\reload_order_icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\sales_pie_icon.png" />
     <Resource Include="Resources\Images\scheduled_order.png" />
     <Resource Include="Resources\Images\settings_icon.png" />
     <Resource Include="Resources\Images\shopping_basket.png" />
@@ -140,6 +194,7 @@
     <Resource Include="Resources\Images\shop_keepers_icon.png" />
     <Resource Include="Resources\Images\shop_list_icon.png" />
     <Resource Include="Resources\Images\success_icon.png" />
+    <Resource Include="Resources\Images\sync_upload_icon.png" />
     <Resource Include="Resources\Images\today_icon.png" />
     <Resource Include="Resources\Images\top_left_icon.png" />
     <Resource Include="Resources\Images\top_right_icon.png" />

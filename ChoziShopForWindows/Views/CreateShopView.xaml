@@ -7,6 +7,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <TextBlock Text="Hello World -> CreateShopView" Foreground="Black" FontSize="16" />
+        <TextBlock Text="ChoziShop only covers single store locations at the moment. Multiple store management is currently in beta mode."
+                   Margin="10" FontFamily="Arial" TextWrapping="WrapWithOverflow"
+                   Foreground="Black" FontSize="16" />
     </Grid>
 </UserControl>

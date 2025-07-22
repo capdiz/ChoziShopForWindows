@@ -4,9 +4,47 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ChoziShopForWindows.Views"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <TextBlock Text="Hello World -> ShopsView" Foreground="Black" FontSize="16" />
-    </Grid>
+    <hc:TransitioningContentControl>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="{Binding ShopsCountHeader}" Foreground="{DynamicResource SearchFontBrush}" 
+                       FontSize="16" FontFamily="Arial" FontWeight="SemiBold" Margin="10" />
+            <hc:Divider Grid.Row="1" Height="1" Background="Aquamarine" Margin="10,0,10,0" />
+            <DataGrid x:Name="ShopsDataGrid" ItemsSource="{Binding Stores, Mode=TwoWay}" HeadersVisibility="All" RowHeaderWidth="60"
+                      AutoGenerateColumns="False" Margin="10,10,10,0" Background="{DynamicResource Lime300Brush}" SelectionMode="Single" Grid.Row="2" VerticalAlignment="Top">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Edit"
+                                  Command=""
+                                  CommandParameter="" />
+                        <MenuItem Header="Add a new Category Section"
+                                  Command=""
+                                  CommandParameter="" />
+                        <MenuItem Header="View Inventory"
+                                  Command=""
+                                  CommandParameter="" />
+                        <MenuItem Header="View Last 5 Orders"
+                                  Command=""
+                                  CommandParameter="" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding OnlineStoreId}" HeaderStyle="{StaticResource DataGridColumnHeaderStyle.Small}"
+                                        Header="Store Id" Foreground="Black" FontWeight="SemiBold" />
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding StoreName}" Header="Name" Foreground="Black" FontWeight="SemiBold" />
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding CreatedAt}" Header="Date of Creation" Foreground="Black" FontWeight="SemiBold" />
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding CategorySectionCount}" Header="Category Sections" Foreground="Black" FontWeight="SemiBold" />
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding OrderCount}" Header="No of Orders" Foreground="Black" FontWeight="SemiBold" />
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding TotalOrdersAmount}" Header="Amount of Orders" Foreground="Black" FontWeight="SemiBold" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </hc:TransitioningContentControl>
 </UserControl>

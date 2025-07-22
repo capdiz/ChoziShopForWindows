@@ -1,12 +1,68 @@
 ﻿<UserControl x:Class="ChoziShopForWindows.Views.PaymentsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ChoziShopForWindows.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <TextBlock Text="Hello World -> PaymentsView" Foreground="Black" FontSize="16" />    
-    </Grid>
+    <hc:TransitioningContentControl>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical">
+                <Image Source="/Resources/Images/airtel_logo.png" Width="64" Height="58" Margin="10" HorizontalAlignment="Center"/>
+                <TextBlock Text="Airtel Pay" Foreground="Black" FontSize="22" FontWeight="Bold" FontFamily="Arial" TextAlignment="Center"/>
+                <hc:Divider Background="Green" Height="1" Margin="10" />
+                <TabControl Margin="10" Style="{StaticResource TabControlInLine}">
+                    <hc:TabItem Header="Collections" Foreground="Black">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{Binding AirtelPayCollectionsHeader, UpdateSourceTrigger=PropertyChanged}" 
+                 FontSize="14" Foreground="Gray" TextAlignment="Center" Margin="10,10,0,10"/>
+                            <DataGrid ItemsSource="{Binding AirtelPayCollections}" HeadersVisibility="All" RowHeaderWidth="60"
+                AutoGenerateColumns="False" Margin="10,0,10,10" Background="{DynamicResource Blue100Brush}" 
+                SelectionMode="Single" SelectionUnit="FullRow" SelectedItem="{Binding SelectedAirtelPayCollection}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding CustomerOrderId}" Header="Order Id" Foreground="DarkBlue" />
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding Msisdn}" Header="MSISDN" Foreground="DarkBlue" />
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding Amount, Converter={StaticResource UgxCurrencyConverter}}" Header="Amount" Foreground="DarkBlue" />
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding Status}" 
+                                  Header="Transaction Status" Foreground="DarkBlue" />
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding AirtelTransactionId}" Header="Airtel Transaction Id" Foreground="Black"/>
+                                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding PaymentInitiatedAt}" Header="Initiated On" Foreground="Black"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </hc:TabItem>
+                    <hc:TabItem Header="Disbursements" Foreground="Black">
+                        <TextBlock Text="Airtel disbursements can only be performed on Merchant phone." FontSize="14" Foreground="Gray" TextAlignment="Center" Margin="20"/>
+                    </hc:TabItem>
+                </TabControl>
+            </StackPanel>
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+                <Image Source="/Resources/Images/momo_logo.png" Width="64" Height="58" Margin="10" HorizontalAlignment="Center"/>
+                <TextBlock Text="MoMo Pay" Foreground="Black" FontSize="22" FontWeight="Bold" FontFamily="Arial" TextAlignment="Center"/>
+                <hc:Divider Background="GreenYellow" Height="1" Margin="10" />
+                <TabControl Margin="10" Style="{StaticResource TabControlInLine}">
+                    <hc:TabItem Header="Collections" Foreground="Black">
+                      
+                            
+                        
+                    </hc:TabItem>
+                    <hc:TabItem Header="Disbursements" Foreground="Black">
+                        <TextBlock Text="MoMo disbursements can only be performed on Merchant phone." FontSize="14" Foreground="Gray" TextAlignment="Center" Margin="20"/>
+                    </hc:TabItem>
+                </TabControl>
+            </StackPanel>
+      
+
+        </Grid>
+    </hc:TransitioningContentControl>
 </UserControl>

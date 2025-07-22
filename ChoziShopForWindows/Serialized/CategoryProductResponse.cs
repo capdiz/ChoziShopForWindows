@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChoziShopForWindows.Data
+namespace ChoziShopForWindows.Serialized
 {
     public class CategoryProductResponse
     {

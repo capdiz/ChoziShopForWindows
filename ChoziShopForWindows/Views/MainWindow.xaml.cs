@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Globalization;
 
 namespace ChoziShopForWindows;
 
@@ -25,8 +26,9 @@ public partial class MainWindow
     public MainWindow()
     {
         InitializeComponent();
-
-        InitializeResourceDictionary();      
+        
+        InitializeResourceDictionary();
+        
     }
 
 
@@ -72,6 +74,13 @@ public partial class MainWindow
             Source = new Uri("pack://application:,,,/Resources/Style/RoundedButtonExtension.xaml")
         };
         Resources.MergedDictionaries.Add(roundedButton);
+
+        ResourceDictionary langDictionary =new ResourceDictionary
+        {
+            Source = new Uri("pack://application:,,,/Resources/Lang/Lang.en-US.xaml")
+        };
+        Resources.MergedDictionaries.Add(langDictionary);
+
     }
 
 

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"             
              xmlns:local="clr-namespace:ChoziShopForWindows"
              xmlns:vm="clr-namespace:ChoziShopForWindows.ViewModels"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:views="clr-namespace:ChoziShopForWindows.Views">
     <Application.Resources>
 
@@ -10,6 +11,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
+
+                <ResourceDictionary Source="/Resources/Lang/Lang.en-US.xaml" />
 
                 <!--Base-->
                 <ResourceDictionary Source="/Resources/Style/Brush.xaml" />

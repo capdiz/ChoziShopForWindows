@@ -40,101 +40,63 @@ Foreground="{DynamicResource DefaultGroupBoxHeaderBrush}" TextAlignment="Left" M
                 </UniformGrid>
                 
                 <Button x:Name="CheckoutOrderButton" Style="{StaticResource RoundedButtonStyle}" Width="64" Height="64" Margin="10,-210,10,10"
+                        Visibility="{Binding IsCheckoutButtonVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                         ext:RoundedButtonExtension.ImageSource="/Resources/Images/checkout_shoppingcart_icon.png"
-                        ext:RoundedButtonExtension.ImageSize="32"
-                        Command="{Binding CheckoutCommand}" ToolTip="Tap to checkout" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        ext:RoundedButtonExtension.ImageSize="32" Command="{Binding CheckoutCommand}" ToolTip="Tap to checkout" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 <Button x:Name="PauseOrderButton" Visibility="{Binding IsPauseOrderButtonVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                         Style="{StaticResource RoundedButtonStyle}" Width="48" Height="48" Margin="10,-160,10,10"
                         ext:RoundedButtonExtension.ImageSource="/Resources/Images/pause_icon.png"
                         ext:RoundedButtonExtension.ImageSize="32"
-                        Command="" ToolTip="Hold current order" HorizontalAlignment="Right"/>
+                        Command="{Binding PauseCurrentOrderCommand}" ToolTip="Hold current order" HorizontalAlignment="Right"/>
 
                 
-                <TabControl MinHeight="350" Margin="10,-45,0,0" Style="{StaticResource TabControlInLine}">
-                    <TabItem Header="{DynamicResource CurrentOrderHeader}" IsSelected="True" Foreground="{DynamicResource BlogDrawingBrush}">
+                <TabControl MinHeight="350" Margin="10,-45,0,0" Style="{StaticResource TabControlInLine}" SelectedItem="{Binding SelectedOrderControlTab}">
+                    <hc:TabItem Name="CurrentOrderTab" Header="{DynamicResource CurrentOrderHeader}" Foreground="{DynamicResource BlogDrawingBrush}">
                         <hc:SimplePanel>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <hc:TransitioningContentControl>
-                                    <hc:SearchBar hc:InfoElement.Placeholder="Find product by name or product-code" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" 
-                                              Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                                        Margin="10" Foreground="{DynamicResource SearchFontBrush}" Style="{StaticResource SearchBarExtend}"
-                                                    Background="{DynamicResource SearchBoxColorBrush}" >
-                                    </hc:SearchBar>
-                                </hc:TransitioningContentControl>
-
-                                <DataGrid Grid.Row="1" x:Name="SelectedCategoryProductsgrid" ItemsSource="{Binding SelectedCategoryProducts}" HeadersVisibility="All" RowHeaderWidth="60"
-                                          AutoGenerateColumns="False" Visibility="{Binding IsSelectedCategoryProductsGridVisible, Converter={StaticResource BoolToVisibilityConverter}}" 
-                                          Margin="10,0,10,10" Background="{DynamicResource Blue100Brush}" SelectionMode="Single" SelectionUnit="FullRow" 
-                                          SelectedItem="{Binding SelectedProductItem}">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn IsReadOnly="True" Width="80" CanUserResize="False" Binding="{Binding ItemNo}" 
-                                                            Header="Item No." Foreground="{DynamicResource ProgressBarBrush}" />
-                                        <DataGridTextColumn IsReadOnly="True" Binding="{Binding ItemName}" Header="Item" Foreground="ForestGreen" />
-                                        <DataGridTextColumn IsReadOnly="True" Binding="{Binding UnitPrice, Converter={StaticResource UgxCurrencyConverter}}" Header="Unit Price" Foreground="Black"/>
-                                        <DataGridTextColumn IsReadOnly="True" Binding="{Binding UnitCount}" Header="No of Items" Foreground="Black"/>
-                                        <DataGridTextColumn IsReadOnly="True" Binding="{Binding TotalPrice, Converter={StaticResource UgxCurrencyConverter}}" Header="Total" Foreground="Black"/>
-                                        <DataGridTemplateColumn CanUserResize="False">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <Button x:Name="RemoveItemButton" Style="{StaticResource RoundedButtonStyle}"
-                                                            Width="32" Height="32"
-                                                            ext:RoundedButtonExtension.ImageSource="/Resources/Images/delete_icon.png"
-                                                            ext:RoundedButtonExtension.ImageSize="20"
-                                                            Command="{Binding DataContext.RemoveProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" ToolTip="Remove item" />
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                        <DataGridTemplateColumn CanUserResize="False">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <Button x:Name="AddItemButton" Style="{StaticResource RoundedButtonStyle}"
-                                                            Width="32" Height="32"
-                                                            ext:RoundedButtonExtension.ImageSource="/Resources/Images/green_plus_icon.png"
-                                                            ext:RoundedButtonExtension.ImageSize="20"
-                                                            Command="{Binding DataContext.AddProductCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" ToolTip="Add item" />
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-
-                                <DataGrid Grid.Row="1" x:Name="SearchResultsDataGrid" ItemsSource="{Binding CategoryProducts}" HeadersVisibility="All" RowHeaderWidth="60" 
-                                          AutoGenerateColumns="False" Visibility="{Binding IsUserQuerying, Converter={StaticResource BoolToVisibilityConverter}}" Margin="10,0,0,10"
-                                          HorizontalAlignment="Left" MinWidth="500" MinHeight="250" Background="LightCyan" SelectedItem="{Binding SelectedCategoryProduct}"
-                                          SelectionMode="Single" SelectionUnit="FullRow">
-                                    <DataGrid.RowHeaderTemplate>
-                                        <DataTemplate>
-                                            <CheckBox IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
-                                        </DataTemplate>
-                                    </DataGrid.RowHeaderTemplate>
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn IsReadOnly="True" Width="80" CanUserResize="False" Binding="{Binding OnlineCategoryProductId}" 
-                                                            Header="Item No." Foreground="{DynamicResource SearchFontBrush}"/>
-                                        <DataGridTextColumn Width="Auto" Binding="{Binding ProductName}" Header="Item Name" Foreground="DarkSlateGray"/>
-                                        <DataGridTextColumn Width="Auto" Binding="{Binding Remarks}" Header="Remarks"/>
-                                        <DataGridTextColumn Width="Auto" Binding="{Binding UnitCost}" Header="Unit Cost"/>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-
-                            </Grid>
+                            <ContentControl x:Name="CurrentOrderContentControl" Content="{Binding CurrentOrderControlTab}" />
                         </hc:SimplePanel>
-                    </TabItem>
-                    <TabItem Header="{DynamicResource HeldOrderHeader}">
-                        <hc:SimplePanel />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource OpenOrderHeader}" >
-                        <hc:SimplePanel />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource ClosedOrderHeader}">
-                        <hc:SimplePanel />
-                    </TabItem>
+                    </hc:TabItem>
+                    <hc:TabItem Name="HeldOrders">
+                        <hc:TabItem.Header>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{DynamicResource HeldOrderHeader}" Visibility="{Binding IsHeldOrdersHeaderVisible, Converter={StaticResource BoolToVisibilityConverter}}" 
+                                           Foreground="DarkSlateGray" />
+                                <hc:Badge Status="Dot" Style="{DynamicResource BadgeInfo}" 
+                                          Visibility="{Binding IsHeldOrdersBadgeVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="{DynamicResource HeldOrderHeader}" Foreground="CadetBlue" />
+                                </hc:Badge>
+                            </StackPanel>
+                        </hc:TabItem.Header>
+                        <hc:SimplePanel>
+                            <ContentControl x:Name="HeldOrdersContentControl" Content="{Binding CurrentOrderControlTab}" />
+                        </hc:SimplePanel>
+                    </hc:TabItem>
+                    <hc:TabItem Name="OpenOrders">
+                        <hc:TabItem.Header>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{DynamicResource OpenOrderHeader}" Foreground="DarkSlateGray" />
+                                <hc:Badge Value="11" Style="{DynamicResource BadgeInfo}" Visibility="Collapsed">
+                                    <TextBlock Text="{DynamicResource OpenOrderHeader}" Foreground="CadetBlue" />
+                                </hc:Badge>
+                            </StackPanel>
+                        </hc:TabItem.Header>
+                        <hc:SimplePanel>
+                            <ContentControl x:Name="OpenOrdersContentControl" Content="{Binding CurrentOrderControlTab}" />
+                        </hc:SimplePanel>
+                    </hc:TabItem>
+                    <hc:TabItem Name="ClosedOrders">
+                        <hc:TabItem.Header>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{DynamicResource ClosedOrderHeader}" Foreground="DarkSlateGray" />
+                                <hc:Badge Status="Dot" Style="{DynamicResource BadgeInfo}" Visibility="Collapsed">
+                                    <TextBlock Text="{DynamicResource ClosedOrderHeader}" Foreground="CadetBlue" />
+                                </hc:Badge>
+                            </StackPanel>
+                        </hc:TabItem.Header>
+                        <hc:SimplePanel>
+                            <ContentControl x:Name="ClosedOrdersContentControl" Content="{Binding CurrentOrderControlTab}" />
+                        </hc:SimplePanel>
+                    </hc:TabItem>
                 </TabControl>
                 <TextBlock x:Name="OutOfStockHeader" Visibility="{Binding IsOutOfStockHeaderVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                            Text="{Binding OutOfStockHeader}" TextWrapping="Wrap" FontFamily="Segoe UI Variable" Foreground="Red" TextAlignment="Left" Margin="10,10,0,0" />

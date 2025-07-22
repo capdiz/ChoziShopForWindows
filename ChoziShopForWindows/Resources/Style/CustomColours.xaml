@@ -14,6 +14,7 @@
     <Color x:Key="BlueGray500">#607D8B</Color>
     <Color x:Key="GrayWhiteColor">#FAFAFA</Color>
     <Color x:Key="Teal800">#00695C</Color>
+    <Color x:Key="Cyan800">#00838F</Color>
     <Color x:Key="Cyan900">#006064</Color>
     <Color x:Key="Blue900">#0D47A1</Color>
     <Color x:Key="Orange900">#E65100</Color>
@@ -21,6 +22,10 @@
     <Color x:Key="Blue50">#E3F2FD</Color>
     <Color x:Key="Blue300">#64B5F6</Color>
     <Color x:Key="Blue100">#BBDEFB</Color>
+    <Color x:Key="BlueGray900">#263238</Color>
+    <Color x:Key="Green50">#E8F5E9</Color>
+    <Color x:Key="Lime300">#DCE775</Color>
+    <Color x:Key="Lime400">#D4E157</Color>
     <SolidColorBrush x:Key="DefaultGroupBoxHeaderBrush" Color="{DynamicResource DefaultHeaderColor}"/>
     <SolidColorBrush x:Key="SalesGroupBoxBrush" Color="{DynamicResource SalesGroupBoxColor}" />
     <SolidColorBrush x:Key="TotalAmountHeaderBrush" Color="{DynamicResource AmountHeader}" />
@@ -42,4 +47,9 @@
     <SolidColorBrush x:Key="Blue50Brush" Color="{DynamicResource Blue50}" />
     <SolidColorBrush x:Key="Blue300Brush" Color="{DynamicResource Blue300}" />
     <SolidColorBrush x:Key="Blue100Brush" Color="{DynamicResource Blue100}" />
+    <SolidColorBrush x:Key="Cyan800Brush" Color="{DynamicResource Cyan800}" />
+    <SolidColorBrush x:Key="BlueGray900Brush" Color="{DynamicResource BlueGray900}"/>
+    <SolidColorBrush x:Key="Green50Brush" Color="{DynamicResource Green50}" />
+    <SolidColorBrush x:Key="Lime300Brush" Color="{DynamicResource Lime300}" />
+    <SolidColorBrush x:Key="Lime400Brush" Color="{DynamicResource Lime400}" />
 </ResourceDictionary>

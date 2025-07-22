@@ -1,0 +1,62 @@
+﻿<Border x:Class="ChoziShopForWindows.Views.EditProductDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:local="clr-namespace:ChoziShopForWindows.Views"
+        mc:Ignorable="d" 
+        d:DesignHeight="650" d:DesignWidth="800"
+        Background="{DynamicResource RegionBrush}">
+    <hc:TransitioningContentControl>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0" Width="22" Height="22" Command="hc:ControlCommands.Close" Style="{StaticResource ButtonIcon}" 
+                    Foreground="{DynamicResource DangerBrush}" hc:IconElement.Geometry="{StaticResource ErrorGeometry}" 
+                    Padding="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5"/>
+            <TextBlock Grid.Row="1" Text="{Binding EditProductHeader}" FontSize="14" Foreground="{DynamicResource Blue600Brush}" FontFamily="Arial" FontWeight="SemiBold" 
+            TextAlignment="Center" Margin="10"/>
+            <hc:Divider Grid.Row="2" Background="Gray" Margin="10,0,10,10" />
+            <UniformGrid Grid.Row="3" Columns="2" Rows="6" Margin="10,10,10,-28" Grid.RowSpan="2">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Product Name" FontSize="13" FontWeight="DemiBold" Foreground="{DynamicResource BlueGray900Brush}"
+                    FontFamily="Comic Sans MS" />
+                    <hc:TextBox hc:InfoElement.Placeholder="{Binding PreviousProductName}" Text="{Binding ProductName, UpdateSourceTrigger=PropertyChanged}" MinWidth="200" Margin="0,10,10,0" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Remarks" FontSize="13" FontWeight="DemiBold" Foreground="{DynamicResource BlueGray900Brush}"
+FontFamily="Comic Sans MS" />
+                    <hc:TextBox hc:InfoElement.Placeholder="{Binding PreviousRemarks}" Text="{Binding Remarks, UpdateSourceTrigger=PropertyChanged}" MinWidth="200" Margin="0,10,10,0" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Unit Cost" FontSize="13" FontWeight="DemiBold" Foreground="{DynamicResource BlueGray900Brush}"
+FontFamily="Comic Sans MS" />
+                    <hc:TextBox hc:InfoElement.Placeholder="{Binding PreviousUnitCost}" Text="{Binding UnitCost, UpdateSourceTrigger=PropertyChanged}" MinWidth="200" Margin="0,10,10,0" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Units" FontSize="13" FontWeight="DemiBold" Foreground="{DynamicResource BlueGray900Brush}"
+FontFamily="Comic Sans MS" />
+                    <hc:TextBox hc:InfoElement.Placeholder="{Binding PreviousUnits}" Text="{Binding Units, UpdateSourceTrigger=PropertyChanged}" MinWidth="200" Margin="0,10,10,0" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="0,10,0,0">
+                    <TextBlock Text="Value Metric" FontSize="13" FontWeight="DemiBold" Foreground="{DynamicResource BlueGray900Brush}"
+ FontFamily="Comic Sans MS" />
+                    <hc:TextBox hc:InfoElement.Placeholder="{Binding PreviousValueMetric}" Text="{Binding ValueMetric, UpdateSourceTrigger=PropertyChanged}" MinWidth="150" Margin="0,10,10,0" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="0,10,0,0">
+                    <TextBlock Text="Measurement" FontSize="13" FontWeight="DemiBold" Foreground="{DynamicResource BlueGray900Brush}"
+ FontFamily="Comic Sans MS" />
+                    <hc:TextBox hc:InfoElement.Placeholder="{Binding PreviousMeasurement}" Text="{Binding Measurement, UpdateSourceTrigger=PropertyChanged}" MinWidth="150" Margin="0,10,10,0" />
+                </StackPanel>
+            </UniformGrid>
+            <Button Grid.Row="4" Command="{Binding UpdateProductCommand}" Content="Update Product Details" FontFamily="Arial" Foreground="White" Style="{StaticResource ButtonPrimary}"
+                    HorizontalAlignment="Center"/>
+        </Grid>
+    </hc:TransitioningContentControl>
+</Border>

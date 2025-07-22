@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HandyControl.Tools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,7 @@ namespace ChoziShopForWindows.Views
         public EasyPosView()
         {
             InitializeComponent();
+            ConfigHelper.Instance.SetLang("en");
 
         }
 

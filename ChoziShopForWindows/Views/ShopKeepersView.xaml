@@ -4,7 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:ChoziShopForWindows.Views"             
+             xmlns:local="clr-namespace:ChoziShopForWindows.Views"       
+             xmlns:validator="clr-namespace:ChoziShopForWindows.Validations"
+             xmlns:behaviour="clr-namespace:ChoziShopForWindows.Extensions"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
@@ -17,7 +19,26 @@
                    Margin="10,10,0,10" FontFamily="Arial" FontWeight="SemiBold" TextAlignment="Center" Grid.Row="0"
                    Visibility="{Binding IsStoreHavingKeeperAccounts, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-        <hc:Card x:Name="Card" MaxWidth="440" Grid.Row="1" Margin="10" Effect="{DynamicResource EffectShadow2}" Background="{DynamicResource RegionBrush}">
+        <TextBlock Text="{Binding StoreKeepersHeader}" Foreground="{DynamicResource TotalAmountHeaderBrush}" FontSize="15"
+                   FontFamily="Arial" FontWeight="SemiBold" Grid.Row="1" Visibility="{Binding IsStoreKeepersDataGridVisible, 
+            Converter={StaticResource BoolToVisibilityConverter}}" />
+        <hc:TransitioningContentControl Grid.Row="2" Visibility="{Binding IsStoreKeepersDatagridVisible,
+            Converter={StaticResource BoolToVisibilityConverter}}">
+            <DataGrid x:Name="StoreKeepersDataGrid" ItemsSource="{Binding StoreKeepers, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      AutoGenerateColumns="False" Margin="10" Background="{DynamicResource Green50Brush}" SelectionMode="Single" SelectionUnit="FullRow">
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding OnlineStoreId}" Header="Store No." Foreground="SteelBlue" FontWeight="SemiBold"/>
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding FullName}" Header="Full Name" Foreground="SteelBlue" FontWeight="SemiBold"/>
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding PhoneNumber}" Header="Phone" Foreground="SteelBlue" FontWeight="SemiBold" />
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding Email}" Header="Email" Foreground="SteelBlue" FontWeight="SemiBold" />
+                    <DataGridTextColumn IsReadOnly="True"  Header="No. of Processed Orders" Foreground="SteelBlue" FontWeight="SemiBold" />
+                    <DataGridTextColumn IsReadOnly="True" Header="Amount in Sales" Foreground="SteelBlue" FontWeight="SemiBold" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </hc:TransitioningContentControl>
+        <hc:Card x:Name="Card" Visibility="{Binding IsNewKeeperControlVisible, Converter={StaticResource BoolToVisibilityConverter}}" 
+                 MaxWidth="440" Grid.Row="1" Margin="10" Effect="{DynamicResource EffectShadow2}" Background="{DynamicResource RegionBrush}">
             <Border CornerRadius="4,4,0,0" Width="400" Height="300">
                 <StackPanel>
                     <TextBlock x:Name="txtAddkeepersSubHeader" Text="{DynamicResource InviteKeeperHeader}" FontSize="15" Foreground="{DynamicResource BlueGray500Brush}"
@@ -25,9 +46,23 @@
                     <hc:Divider Margin="10,0,10,0" Background="{DynamicResource DividerBrush}"/>
                     <UniformGrid Rows="3" Width="390">
                         <hc:Tag Header="UG" hc:TitleElement.Background="{DynamicResource DarkPrimaryBrush}" Margin="0,10,5,0" Content="+256" />
-                        <hc:TextBox hc:InfoElement.Placeholder="{DynamicResource PhoneNumberHeader}" MaxWidth="220" MinWidth="200" Margin="0,10,10,0" />
-                        <Button Grid.ColumnSpan="1" x:Name="btnInviteKeeper" Content="{DynamicResource InvitationSmsHeader}" Background="{DynamicResource DarkSuccessBrush}"
-                                HorizontalAlignment="Center" Foreground="{DynamicResource GrayWhiteBrush}" FontSize="15" FontFamily="Arial" FontWeight="SemiBold" Margin="0,10,0,0"/>
+                        <TextBox x:Name="PhoneTextBox" behaviour:PhoneValidationExtension.ValidatePhone="True" 
+                                 Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="250" MinHeight="30">
+                           
+                            <TextBox.Text>
+                                <Binding Path="PhoneNumber" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding.ValidationRules>
+                                        <validator:PhoneValidationRuleUganda ValidatesOnTargetUpdated="True" />
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+
+                        <Button Grid.ColumnSpan="1" x:Name="btnInviteKeeper" Command="{Binding SendInvitationCodeCommand}"
+                                IsEnabled="{Binding IsSendSmsCodeButtonEnabled}"
+                                Content="{DynamicResource InvitationSmsHeader}" Background="{DynamicResource DarkSuccessBrush}"
+                                HorizontalAlignment="Center" Foreground="{DynamicResource GrayWhiteBrush}" 
+                                FontSize="15" FontFamily="Arial" FontWeight="SemiBold" Margin="0,10,0,0"/>
                     </UniformGrid>
                 </StackPanel>
             </Border>

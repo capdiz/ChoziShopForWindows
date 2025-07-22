@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore.Query.Internal;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,8 @@ namespace ChoziShopForWindows.Data
         public DateTime ExpiresAt { get; set; }
         [JsonProperty("type")]
         public string Type { get; set; }
+
+        public int ResponseCode { get; set; }
 
         public WindowsSessionResponse() { }
     }

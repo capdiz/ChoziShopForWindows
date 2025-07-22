@@ -5,6 +5,7 @@ using ChoziShopForWindows.MerchantsApi;
 using ChoziShopForWindows.Services;
 using ChoziShopForWindows.ViewModels;
 using ChoziShopForWindows.Views;
+using HandyControl.Tools;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,9 @@ using Serilog.Core;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
 using System.Threading.Tasks;
@@ -27,8 +30,9 @@ namespace ChoziShopForWindows;
 /// Interaction logic for App.xaml
 /// </summary>
 public partial class App : Application
-{
+{   
     private IHost _host;
+    public static IServiceProvider ServiceProvider { get; private set; }
 
     public App()
     {
@@ -47,17 +51,20 @@ public partial class App : Application
                 // Add internet monitoring service
                 services.AddSingleton<InternetConnectivityMonitorService>();
                 var service = services.BuildServiceProvider();
+                ServiceProvider = service;
                 var statusService = service.GetRequiredService<InternetConnectivityMonitorService>();
                 services.AddSingleton<MainWindowViewModel>();
-                services.AddSingleton<OrdersViewModel>();
-
+                services.AddScoped<OrdersViewModel>();
+                services.AddScoped<InventoryViewModel>();
+                services.AddScoped<PaymentsViewModel>();
 
                 services.AddTransient<HomeView>(provider => new HomeView
                 {
                     DataContext = provider.GetRequiredService<OrdersViewModel>()
                 });
-                services.AddTransient<EasyPosView>(provider => 
-                {                    
+
+                services.AddTransient<EasyPosView>(provider =>
+                {
                     var easyPosView = new EasyPosView();
                     easyPosView.DataContext = provider.GetRequiredService<OrdersViewModel>();
                     return easyPosView;
@@ -65,7 +72,7 @@ public partial class App : Application
                 });
                 services.AddTransient<OrderCheckoutDialog>(provider =>
                 {
-                    
+
                     var ordersViewModel = provider.GetRequiredService<OrdersViewModel>();
                     return new OrderCheckoutDialog(ordersViewModel);
                 });
@@ -86,9 +93,25 @@ public partial class App : Application
                 {
                     DataContext = provider.GetRequiredService<OrdersViewModel>()
                 });
-                services.AddTransient<InventoryView>(provider => new InventoryView
+                services.AddTransient<CurrentOrderControl>(provider => new CurrentOrderControl
                 {
                     DataContext = provider.GetRequiredService<OrdersViewModel>()
+                });
+                services.AddTransient<HeldOrdersControl>(provider => new HeldOrdersControl
+                {
+                    DataContext = provider.GetRequiredService<OrdersViewModel>()
+                });
+                services.AddTransient<OpenOrdersControl>(provider => new OpenOrdersControl
+                {
+                    DataContext = provider.GetRequiredService<OrdersViewModel>()
+                });
+                services.AddTransient<ClosedOrdersControl>(provider => new ClosedOrdersControl
+                {
+                    DataContext = provider.GetRequiredService<OrdersViewModel>()
+                });
+                services.AddTransient<InventoryView>(provider => new InventoryView
+                {
+                    DataContext = provider.GetRequiredService<InventoryViewModel>()
                 });
                 services.AddTransient<PaymentsView>(provider => new PaymentsView
                 {
@@ -110,9 +133,38 @@ public partial class App : Application
                 {
                     DataContext = provider.GetRequiredService<OrdersViewModel>()
                 });
+                services.AddTransient<NewProductDialog>(provider => new NewProductDialog(provider.GetRequiredService<InventoryViewModel>()));
 
-                services.AddSingleton<DatabaseWatcher>(provider => new DatabaseWatcher(DbFileConfig.ConnectionString, () =>
-                provider.GetService<ILogger<DatabaseWatcher>>().LogInformation("Database file changed")));
+                services.AddTransient<ProductListDialog>(provider => new ProductListDialog
+                {
+                    DataContext = provider.GetRequiredService<InventoryViewModel>()
+                });
+
+                services.AddTransient<NewCategorySectionDialog>(provider => new NewCategorySectionDialog
+                {
+                    DataContext = provider.GetRequiredService<InventoryViewModel>()
+                });
+               
+                services.AddTransient<PaymentsView>(provider => new PaymentsView
+                {
+                    DataContext = provider.GetRequiredService<PaymentsViewModel>()
+                });
+                services.AddTransient<PaymentAggregatorsView>(provider => new PaymentAggregatorsView
+                {
+                    DataContext = provider.GetRequiredService<PaymentsViewModel>()
+                });
+
+                services.AddSingleton<DatabaseWatcher>(provider =>
+                {
+                    var logger = provider.GetRequiredService<ILogger<DatabaseWatcher>>();
+                    return new DatabaseWatcher(DbFileConfig.DbFilePath, onChange: () =>
+                    {
+                        logger.LogError("Database file changed");
+                        // Handle the database file change event
+                        // e.g., reload data, notify users, etc.
+                    });
+                });
+
 
 
                 services.AddSingleton<MainWindow>(provider =>
@@ -129,6 +181,11 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        // Set the UI culture to English (critical for HandyControl)
+        Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+
+        
+
         CheckAndStartService();
         var directoryPath = new DirectoryInfo(DbFileConfig.DbFilePath);
         if (!directoryPath.Exists)
@@ -158,16 +215,19 @@ public partial class App : Application
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                Debug.WriteLine("Error message: {message}", ex.Message);
+                Debug.WriteLine($"Error message: {ex.Message}", ex.Message);
             }
         }
 
         await _host.StartAsync();
 
+        ConfigHelper.Instance.SetLang("en");
+
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
-
+        
         base.OnStartup(e);
+
     }
 
     private static void CleanUp(bool disposed)

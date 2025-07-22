@@ -1,0 +1,64 @@
+﻿<UserControl x:Class="ChoziShopForWindows.Views.PaymentAggregatorsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ChoziShopForWindows.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <hc:TransitioningContentControl>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Grid.Column="0">
+                <Image Source="/Resources/Images/uedcl_logo.jpeg" HorizontalAlignment="Center" Height="186" Width="212" />
+                <TextBlock Text="UEDCL Light" Foreground="Black" FontSize="22" FontWeight="Bold" FontFamily="Arial" TextAlignment="Center"
+                           Margin="10"/>
+                <hc:Divider Background="Green" Height="1" Margin="10" />
+                <Button Content="Buy light token" Style="{StaticResource ButtonSuccess.Small}" FontFamily="Arial" FontSize="14"
+                        HorizontalAlignment="Right" Margin="10" />
+                <TabControl Margin="10" Style="{StaticResource TabControlInLine}">
+                    <hc:TabItem Header="Processed Tokens" Foreground="Gray">
+                        <TextBlock Text="UEDCL light token feature is under BETA testing." FontSize="14" Foreground="Gray" TextAlignment="Center" Margin="20"/>
+                    </hc:TabItem>
+                </TabControl>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1">
+                <Image Source="/Resources/Images/nwsc_logo.png" HorizontalAlignment="Center" Height="186" Width="212" />
+                <TextBlock Text="NWSC" Foreground="Black" FontSize="22" FontWeight="Bold" FontFamily="Arial" TextAlignment="Center"
+               Margin="10"/>
+                <hc:Divider Background="Green" Height="1" Margin="10" />
+                <Button Content="Pay water bill" Style="{StaticResource ButtonPrimary.Small}" FontFamily="Arial" FontSize="14"
+            HorizontalAlignment="Right" Margin="10" />
+                <TabControl Margin="10" Style="{StaticResource TabControlInLine}">
+                    <hc:TabItem Header="Collections" Foreground="Gray">
+                        <TextBlock Text="NWSC feature is under BETA testing." FontSize="14" Foreground="Gray" TextAlignment="Center" Margin="20"/>
+                    </hc:TabItem>
+                </TabControl>
+            </StackPanel>
+            <StackPanel Grid.Row="0" Grid.Column="2">
+                <Image Source="/Resources/Images/dstv_logo.jpeg" HorizontalAlignment="Center" Height="186" Width="212" />
+                <TextBlock Text="DSTv" Foreground="Black" FontSize="22" FontWeight="Bold" FontFamily="Arial" TextAlignment="Center"
+   Margin="10"/>
+                <hc:Divider Background="Green" Height="1" Margin="10" />
+                <Button Content="Pay TV" Style="{StaticResource ButtonInfo.Small}" FontFamily="Arial" FontSize="14"
+HorizontalAlignment="Right" Margin="10" />
+                <TabControl Margin="10" Style="{StaticResource TabControlInLine}">
+                    <hc:TabItem Header="Package Collections" Foreground="Gray">
+                        <TextBlock Text="DSTV feature is under BETA testing." FontSize="14" Foreground="Gray" TextAlignment="Center" Margin="20"/>
+                    </hc:TabItem>
+                </TabControl>
+            </StackPanel>
+        </Grid>
+    </hc:TransitioningContentControl>
+    
+</UserControl>
